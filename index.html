@@ -4,7 +4,7 @@ cat << 'EOF' > index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GNL1Z Asset Manager Pro - Dynamic</title>
+    <title>GNL1Z Asset Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { sonaOrange: '#FF6B00' } } } }
@@ -13,124 +13,298 @@ cat << 'EOF' > index.html
         .hidden-view { display: none !important; }
         body { transition: background-color 0.3s; font-family: ui-sans-serif, system-ui; }
         .card-bg { background-color: #0f172a; border-color: #1e293b; }
+        .light body { background-color: #f8fafc; color: #0f172a; }
         .light .card-bg { background-color: #ffffff; border-color: #cbd5e1; }
+        .dark body { background-color: #020617; color: #f8fafc; }
         .loader { border-top-color: #FF6B00; animation: spinner 1.5s linear infinite; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body class="min-h-screen">
 
     <div id="loading-screen" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col items-center justify-center">
         <div class="loader w-12 h-12 border-4 border-slate-700 rounded-full mb-4"></div>
-        <p class="text-sonaOrange font-bold animate-pulse">Chargement de la base GNL1Z...</p>
+        <p class="text-sonaOrange font-bold animate-pulse">Loading GNL1Z Database...</p>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <span class="font-black text-xl text-white">GNL1Z <span class="text-sonaOrange">Manager</span></span>
+    <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-300 dark:border-slate-800 px-4 py-3 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2">
+            <div class="bg-sonaOrange p-1 rounded"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Sonatrach.svg/1200px-Sonatrach.svg.png" class="h-5" alt="Sonatrach"></div>
+            <span class="font-black tracking-tight text-lg dark:text-white">GNL1Z <span class="text-sonaOrange">Manager</span></span>
         </div>
-        <button onclick="document.documentElement.classList.toggle('light')" class="p-2 rounded-lg border border-slate-700">🌓</button>
+        <div class="flex gap-2">
+            <button onclick="toggleTheme()" class="p-2 rounded border border-slate-300 dark:border-slate-700 dark:text-white">🌓</button>
+            <button onclick="toggleLang()" id="lang-btn" class="px-3 py-1 font-bold rounded border border-slate-300 dark:border-slate-700 dark:text-white">EN</button>
+        </div>
     </nav>
 
-    <main class="pt-24 pb-12 px-4 max-w-2xl mx-auto">
+    <main class="pt-20 pb-12 px-4 max-w-2xl mx-auto dark:text-slate-200">
+        
         <div id="view-home" class="space-y-4">
-            <div class="grid grid-cols-1 gap-4">
-                <button onclick="nav('equip')" class="card-bg p-6 rounded-xl border flex flex-col text-left hover:border-sonaOrange transition">
-                    <h3 class="text-sonaOrange font-bold text-xl mb-1">Base de Données Équipements</h3>
-                    <p class="text-sm text-slate-400" id="stats-label">Chargement des données...</p>
-                </button>
-                <button onclick="nav('dcs')" class="card-bg p-6 rounded-xl border flex flex-col text-left hover:border-sonaOrange transition">
-                    <h3 class="text-sonaOrange font-bold text-xl mb-1">Recherche DCS</h3>
-                    <p class="text-sm text-slate-400">Localisation des tags instruments</p>
-                </button>
+            <button onclick="nav('about')" class="w-full card-bg p-5 rounded-xl border flex justify-between items-center hover:border-sonaOrange transition">
+                <span class="font-bold text-lg text-sonaOrange" id="t-menu-1">1. À propos de GNL1Z</span><span class="text-xl">→</span>
+            </button>
+            <button onclick="nav('equip')" class="w-full card-bg p-5 rounded-xl border flex justify-between items-center hover:border-sonaOrange transition">
+                <span class="font-bold text-lg text-sonaOrange" id="t-menu-2">2. Liste des Équipements</span><span class="text-xl">→</span>
+            </button>
+            <button onclick="nav('dcs')" class="w-full card-bg p-5 rounded-xl border flex justify-between items-center hover:border-sonaOrange transition">
+                <span class="font-bold text-lg text-sonaOrange" id="t-menu-3">3. Section DCS & Instruments</span><span class="text-xl">→</span>
+            </button>
+            <button onclick="nav('manual')" class="w-full card-bg p-5 rounded-xl border flex justify-between items-center hover:border-sonaOrange transition">
+                <span class="font-bold text-lg text-sonaOrange" id="t-menu-4">4. Manuels Opérationnels</span><span class="text-xl">→</span>
+            </button>
+            <button onclick="nav('author')" class="w-full card-bg p-5 rounded-xl border flex justify-between items-center hover:border-sonaOrange transition">
+                <span class="font-bold text-lg text-sonaOrange" id="t-menu-5">5. Auteur & Contact</span><span class="text-xl">→</span>
+            </button>
+        </div>
+
+        <div id="view-about" class="hidden-view space-y-6">
+            <button onclick="nav('home')" class="text-sonaOrange font-bold flex items-center gap-1">← <span class="t-back">Retour</span></button>
+            <h2 class="text-3xl font-black text-sonaOrange border-b-2 border-sonaOrange pb-2">GNL1Z Process</h2>
+            <div class="card-bg p-6 rounded-xl border text-sm leading-relaxed space-y-4">
+                <p id="t-about-p1">Le complexe GNL1Z utilise le procédé APCI C3-MR. Il comprend des sections de pré-traitement (Décarbonatation MEA, Déshydratation, Démercurisation) et une section de liquéfaction cryogénique principale.</p>
             </div>
         </div>
 
         <div id="view-equip" class="hidden-view space-y-4">
-            <button onclick="nav('home')" class="text-sonaOrange font-bold">← Retour</button>
-            <input type="text" id="search-input" placeholder="Tag ou Nom (ex: F-501)..." class="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl outline-none focus:border-sonaOrange" oninput="renderList()">
+            <button onclick="nav('home')" class="text-sonaOrange font-bold flex items-center gap-1">← <span class="t-back">Retour</span></button>
+            <input type="text" id="search-input" placeholder="Tag ou Nom (ex: E-501)..." class="w-full p-4 bg-transparent border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-sonaOrange" oninput="renderList()">
             <div id="list-container" class="space-y-3"></div>
         </div>
 
         <div id="view-detail" class="hidden-view space-y-6">
-            <button onclick="nav('equip')" class="text-sonaOrange font-bold">← Liste</button>
+            <button onclick="nav('equip')" class="text-sonaOrange font-bold flex items-center gap-1">← Liste</button>
             <div id="detail-content"></div>
         </div>
+
+        <div id="view-dcs" class="hidden-view space-y-6">
+            <button onclick="nav('home')" class="text-sonaOrange font-bold flex items-center gap-1">← <span class="t-back">Retour</span></button>
+            <input type="text" id="dcs-input" placeholder="Chercher instrument (ex: LIC-501)..." class="w-full p-4 bg-transparent border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:border-sonaOrange" oninput="renderDCS()">
+            <div id="dcs-container" class="space-y-3 mt-4"></div>
+        </div>
+
+        <div id="view-manual" class="hidden-view space-y-6">
+            <button onclick="nav('home')" class="text-sonaOrange font-bold flex items-center gap-1">← <span class="t-back">Retour</span></button>
+            <h2 class="text-2xl font-black text-sonaOrange">Manuels Opérationnels</h2>
+            <div class="card-bg p-6 rounded-xl border text-center">
+                <p class="text-sm opacity-70 mb-4" id="t-manual-desc">Dépôt pour 23 manuels PDF. Les liens Google Drive seront intégrés ici.</p>
+                <div class="grid grid-cols-2 gap-2 text-xs" id="manual-grid">
+                    </div>
+            </div>
+        </div>
+
+        <div id="view-author" class="hidden-view space-y-6">
+            <button onclick="nav('home')" class="text-sonaOrange font-bold flex items-center gap-1">← <span class="t-back">Retour</span></button>
+            <div class="card-bg p-6 rounded-xl border flex flex-col items-center text-center space-y-4">
+                <div class="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center text-3xl font-black text-sonaOrange shadow-lg">DMS</div>
+                <div>
+                    <h2 class="text-2xl font-black text-sonaOrange">Djamel Mokhtar Slimani</h2>
+                    <p class="font-bold opacity-80">Mechanical Engineer & Manager</p>
+                </div>
+                <div class="w-full border-t border-slate-700 pt-4 text-sm opacity-80 space-y-2">
+                    <p><strong>Entreprise :</strong> Sonatrach (Département Mécanique)</p>
+                    <p><strong>Formation :</strong> Université Mhamed Bougara, Boumerdes</p>
+                    <p><strong>Spécialité :</strong> Transport & Équipement des Hydrocarbures</p>
+                    <p><strong>Localisation :</strong> Saida, Algérie</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
+        // --- GLOBAL DATA & STATE ---
         let GLOBAL_DATA = null;
+        let lang = 'fr';
         const DATA_URL = "https://raw.githubusercontent.com/djslimaniunivboumerdes-netizen/GNL1Z-MANAGER-/main/GNL1Z_DATABASE.json";
 
-        // Initialisation : Fetch du JSON
         async function init() {
             try {
                 const response = await fetch(DATA_URL);
                 GLOBAL_DATA = await response.json();
-                document.getElementById('stats-label').innerText = `${GLOBAL_DATA.equipment_count} Équipements | ${GLOBAL_DATA.spare_parts_count} PDR`;
                 document.getElementById('loading-screen').classList.add('hidden-view');
+                buildManuals();
+                updateLangStrings();
             } catch (error) {
-                console.error("Erreur de chargement:", error);
-                alert("Erreur lors de la lecture de la base GitHub.");
+                console.error("Fetch error:", error);
+                document.getElementById('loading-screen').innerHTML = '<p class="text-red-500 p-4">Erreur de chargement. Vérifiez votre connexion.</p>';
             }
+        }
+
+        // --- THEME & LANGUAGE ---
+        function toggleTheme() { document.documentElement.classList.toggle('light'); }
+        function toggleLang() {
+            lang = lang === 'fr' ? 'en' : 'fr';
+            document.getElementById('lang-btn').innerText = lang === 'fr' ? 'EN' : 'FR';
+            updateLangStrings();
+        }
+
+        function updateLangStrings() {
+            const str = {
+                fr: { m1: "1. À propos de GNL1Z", m2: "2. Liste des Équipements", m3: "3. Section DCS & Instruments", m4: "4. Manuels Opérationnels", m5: "5. Auteur & Contact", back: "Retour" },
+                en: { m1: "1. About GNL1Z", m2: "2. Equipment List", m3: "3. DCS & Instruments", m4: "4. Operational Manuals", m5: "5. Author & Contact", back: "Back" }
+            };
+            document.getElementById('t-menu-1').innerText = str[lang].m1;
+            document.getElementById('t-menu-2').innerText = str[lang].m2;
+            document.getElementById('t-menu-3').innerText = str[lang].m3;
+            document.getElementById('t-menu-4').innerText = str[lang].m4;
+            document.getElementById('t-menu-5').innerText = str[lang].m5;
+            document.querySelectorAll('.t-back').forEach(e => e.innerText = str[lang].back);
+            if(!document.getElementById('view-equip').classList.contains('hidden-view')) renderList();
+            if(!document.getElementById('view-dcs').classList.contains('hidden-view')) renderDCS();
         }
 
         function nav(id) {
             document.querySelectorAll('main > div').forEach(v => v.classList.add('hidden-view'));
             document.getElementById('view-' + id).classList.remove('hidden-view');
             if(id === 'equip') renderList();
+            if(id === 'dcs') renderDCS();
         }
 
+        // --- 2. EQUIPMENT LIST ---
         function renderList() {
             const query = document.getElementById('search-input').value.toUpperCase();
             const container = document.getElementById('list-container');
             container.innerHTML = '';
-
-            const filtered = GLOBAL_DATA.equipment.filter(e => e.tag.includes(query) || e.name_fr.toUpperCase().includes(query));
+            
+            if(!GLOBAL_DATA) return;
+            const filtered = GLOBAL_DATA.equipment.filter(e => e.tag.includes(query) || (e.name_fr && e.name_fr.toUpperCase().includes(query)));
 
             filtered.forEach(e => {
                 const div = document.createElement('div');
-                div.className = "card-bg p-4 rounded-xl border cursor-pointer hover:border-sonaOrange";
+                div.className = "card-bg p-4 rounded-xl border cursor-pointer hover:border-sonaOrange transition";
                 div.onclick = () => showDetail(e);
-                div.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="text-sonaOrange font-black">${e.tag}</div>
-                            <div class="text-xs text-slate-400">${e.section}</div>
+                div.innerHTML = `<div class="font-black text-sonaOrange text-lg">${e.tag}</div><div class="text-xs opacity-70">${lang === 'fr' ? e.name_fr : e.name_en}</div>`;
+                container.appendChild(div);
+            });
+        }
+
+        // --- SMART ELABORATION ENGINE ---
+        function predictTools(equip, parts) {
+            let tools = [];
+            let bolt = equip.technical?.bolt_size || "";
+            if (bolt) tools.push(`Clés / Douilles pour écrous ${bolt} (Wrenches/Sockets for ${bolt})`);
+            if (equip.type?.code === 'E') tools.push("Extracteur de faisceau (Bundle Extractor)", "Nettoyeur Très Haute Pression (HP Cleaner)", "Pompe d'épreuve (Hydrotest Pump)");
+            if (parts.some(p => p.description.toLowerCase().includes('joint'))) tools.push("Grattoir de joint anti-étincelles (Non-sparking Gasket Scraper)", "Écarteur de brides (Flange Spreader)");
+            if (tools.length === 0) tools.push("Outillage mécanique standard (Standard Mechanical Toolkit)");
+            return tools;
+        }
+
+        function predictLifting(equip) {
+            let w = equip.technical?.weight_kg || 0;
+            if (w > 15000) return "Opération de levage lourd (Heavy Lift). Grue mobile > 50T requise. Élingues synthétiques haute capacité + Palonnier spécifique.";
+            if (w > 2000) return "Levage intermédiaire. Grue mobile standard ou portique. Manilles lyres de capacité correspondante.";
+            return "Levage léger. Palan manuel ou petit équipement de levage (Chain hoist/Forklift).";
+        }
+
+        function predictIsolation(equip) {
+            let sec = (equip.section || "").toLowerCase();
+            let temp = equip.technical?.temperature || 25; // default
+            
+            let procedure = "LOTO standard : Platine d'obturation (Blind flange) + Double Block & Bleed.";
+            let calorifuge = "Standard (Aucun ou protection personnel).";
+
+            if (sec.includes('mea') || sec.includes('décarb')) {
+                calorifuge = "Laine de roche (Mineral Wool) + Revêtement aluminium.";
+                procedure += " Attention: Rinçage approfondi requis (Présence Amine).";
+            } else if (sec.includes('cryo') || sec.includes('liquéfaction') || temp < 0) {
+                calorifuge = "Cryogénique : Mousse Polyuréthane (PIR) + Pare-vapeur renforcé.";
+                procedure += " Attention: Réchauffement progressif (Deriming) et Purge N2 obligatoires.";
+            }
+            return { procedure, calorifuge };
+        }
+
+        // --- 2.X EQUIPMENT DETAIL (The 5 Sub-Sections) ---
+        function showDetail(e) {
+            nav('detail');
+            const parts = e.spare_parts_list || [];
+            
+            const predictedTools = predictTools(e, parts);
+            const liftingDetails = predictLifting(e);
+            const isoDetails = predictIsolation(e);
+
+            const partsHtml = parts.length > 0 ? parts.map(p => `<li class="border-b border-slate-700 py-1"><span class="text-sonaOrange font-bold">${p.code}</span> - ${p.description} <br><span class="text-[10px] opacity-60">Qty: ${p.qty_installed} | Stock: ${p.stock_location}</span></li>`).join('') : 'Aucune PDR listée.';
+            const toolsHtml = predictedTools.map(t => `<li class="py-1 flex gap-2"><span class="text-sonaOrange">▪</span>${t}</li>`).join('');
+
+            document.getElementById('detail-content').innerHTML = `
+                <h2 class="text-3xl font-black text-sonaOrange mb-4">${e.tag}</h2>
+                <div class="space-y-3">
+                    
+                    <details class="card-bg border rounded-lg p-4 outline-none"><summary class="font-bold cursor-pointer outline-none">1. Informations Équipement</summary>
+                        <div class="mt-4 text-sm opacity-80 grid grid-cols-2 gap-2">
+                            <p><strong>Type Test:</strong> ${e.testing_status}</p>
+                            <p><strong>Dernier Test:</strong> ${e.maintenance?.last_tested || 'N/A'}</p>
+                            <p><strong>Pression:</strong> ${e.technical?.pressure_bar || '0'} Bar</p>
+                            <p><strong>Volume:</strong> ${e.technical?.volume_m3 || '0'} m³</p>
+                            <p><strong>Masse:</strong> ${e.technical?.weight_kg || '0'} kg</p>
+                            <p><strong>Serial No:</strong> ${e.technical?.serial_no || 'N/A'}</p>
                         </div>
-                        <span class="text-[10px] px-2 py-1 rounded bg-slate-800">${e.testing_status}</span>
+                    </details>
+
+                    <details class="card-bg border rounded-lg p-4 outline-none" open><summary class="font-bold cursor-pointer outline-none">2. Liste des Composants (PDR)</summary>
+                        <ul class="mt-4 text-xs opacity-90">${partsHtml}</ul>
+                    </details>
+
+                    <details class="card-bg border rounded-lg p-4 outline-none"><summary class="font-bold cursor-pointer outline-none">3. Outils Prévisionnels</summary>
+                        <p class="text-[10px] text-slate-500 mb-2 italic">* Généré d'après la taille de boulonnerie et les composants</p>
+                        <ul class="mt-2 text-sm opacity-90">${toolsHtml}</ul>
+                    </details>
+
+                    <details class="card-bg border rounded-lg p-4 outline-none"><summary class="font-bold cursor-pointer outline-none">4. Procédure de Levage</summary>
+                        <p class="text-[10px] text-slate-500 mb-2 italic">* Calculé d'après la masse technique de ${e.technical?.weight_kg || 0} kg</p>
+                        <p class="mt-2 text-sm opacity-90">${liftingDetails}</p>
+                    </details>
+
+                    <details class="card-bg border rounded-lg p-4 outline-none"><summary class="font-bold cursor-pointer outline-none">5. Calorifuge & Isolation</summary>
+                        <p class="text-[10px] text-slate-500 mb-2 italic">* Élaboré d'après la section d'opération (${e.section})</p>
+                        <div class="mt-2 text-sm opacity-90 space-y-2">
+                            <p><strong>Isolation (LOTO) :</strong> ${isoDetails.procedure}</p>
+                            <p><strong>Calorifuge :</strong> ${isoDetails.calorifuge}</p>
+                        </div>
+                    </details>
+
+                </div>
+            `;
+        }
+
+        // --- 3. DCS LIST ---
+        function renderDCS() {
+            const query = document.getElementById('dcs-input').value.toUpperCase();
+            const container = document.getElementById('dcs-container');
+            container.innerHTML = '';
+            
+            // Generate a fake but realistic instrument list for demonstration mapping
+            const instruments = [
+                { inst: "LIC-501", map: "DCS_MAP_100_MEA", dcsDesc: "Section Décarbonatation" },
+                { inst: "TIC-502", map: "DCS_MAP_500_CRYO", dcsDesc: "MCHE Control" },
+                { inst: "PIC-105", map: "DCS_MAP_100_FEED", dcsDesc: "Feed Gas Control" }
+            ];
+
+            const filtered = instruments.filter(i => i.inst.includes(query));
+            filtered.forEach(i => {
+                const div = document.createElement('div');
+                div.className = "card-bg p-4 rounded-xl border flex justify-between items-center";
+                div.innerHTML = `
+                    <div>
+                        <div class="font-bold text-sonaOrange">${i.inst}</div>
+                        <div class="text-xs opacity-60">Located in: ${i.map} (${i.dcsDesc})</div>
                     </div>
+                    <button class="bg-slate-800 border border-slate-600 px-3 py-1 rounded text-xs font-bold hover:bg-sonaOrange hover:text-black transition">Ouvrir DCS</button>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function showDetail(e) {
-            nav('detail');
-            const sparePartsHtml = e.spare_parts_list.map(p => `
-                <div class="text-[11px] border-b border-slate-800 pb-2 mb-2">
-                    <div class="text-sonaOrange font-bold">${p.code} - ${p.description}</div>
-                    <div class="flex justify-between text-slate-500">
-                        <span>Stock: ${p.stock_location}</span>
-                        <span>Qté: ${p.qty_installed}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            document.getElementById('detail-content').innerHTML = `
-                <h2 class="text-3xl font-black text-white">${e.tag}</h2>
-                <p class="text-sonaOrange mb-6">${e.name_fr}</p>
-                
-                <div class="space-y-3">
-                    <details class="card-bg border rounded-lg p-4"><summary class="font-bold cursor-pointer">1. Type de Test</summary><p class="mt-2 text-sm">${e.testing_status}</p></details>
-                    <details class="card-bg border rounded-lg p-4" open><summary class="font-bold cursor-pointer">2. Composants (PDR)</summary><div class="mt-4">${sparePartsHtml || 'Aucune pièce listée'}</div></details>
-                    <details class="card-bg border rounded-lg p-4"><summary class="font-bold cursor-pointer">3. Spécifications Techniques</summary><p class="mt-2 text-sm">Poids: ${e.technical.weight_kg}kg | Boulonnerie: ${e.technical.bolt_size}</p></details>
-                    <details class="card-bg border rounded-lg p-4"><summary class="font-bold cursor-pointer">4. Levage & Manutention</summary><p class="mt-2 text-sm">Méthode: ${e.maintenance.lifting_method.replace('_', ' ')}</p></details>
-                    <details class="card-bg border rounded-lg p-4"><summary class="font-bold cursor-pointer">5. Notes de Maintenance</summary><p class="mt-2 text-sm italic">${e.notes || 'R.A.S'}</p></details>
-                </div>
-            `;
+        // --- 4. MANUALS GRID ---
+        function buildManuals() {
+            let html = '';
+            for(let i=1; i<=23; i++) {
+                html += `<div class="p-3 border border-slate-700 bg-slate-800 rounded flex items-center justify-center opacity-50">Manual_Vol_${i}.pdf</div>`;
+            }
+            document.getElementById('manual-grid').innerHTML = html;
         }
 
+        // Init App
         init();
     </script>
 </body>
