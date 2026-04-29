@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GNL1Z Equipment Manager — Sonatrach</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────────── */
+    :root {
+      --bg:        #06090f;
+      --surface:   #0c1120;
+      --surface2:  #111827;
+      --border:    #1f2d45;
+      --text:      #d1dbe8;
+      --muted:     #5a6e88;
+      --accent:    #e87c1e;      /* Sonatrach orange */
+      --accent2:   #f4a24a;
+      --blue:      #38bdf8;
+      --green:     #34d399;
+      --red:       #f87171;
+      --radius:    10px;
+    }
+    .light {
+      --bg:        #f0f2f5;
+      --surface:   #ffffff;
+      --surface2:  #f8f9fb;
+      --border:    #dde3ed;
+      --text:      #1a2535;
+      --muted:     #7a8fa8;
+      --accent:    #d4691a;
+      --accent2:   #e88540;
+    }
+
+    /* ─── RESET ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; font-size:16px; }
+    body { font-family:'IBM Plex Sans', sans-serif; background:var(--bg); color:var(--text);
+           transition: background .3s, color .3s; overflow-x:hidden; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; border-radius:var(--radius); }
+
+    /* ─── SCROLLBAR ─────────────────────────────────────── */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+    /* ─── NAV ───────────────────────────────────────────── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      background:var(--surface); border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);
+      display:flex; align-items:center; gap:20px;
+      padding:0 28px; height:60px;
+    }
+    .nav-logo { display:flex; align-items:center; gap:12px; }
+    .nav-logo img { height:36px; width:auto; }
+    .nav-brand { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px;
+                 color:var(--accent); letter-spacing:.06em; }
+    .nav-brand span { color:var(--text); opacity:.7; font-weight:500; font-size:13px;
+                      display:block; letter-spacing:.12em; }
+    nav ul { display:flex; gap:4px; list-style:none; flex:1; }
+    nav ul a {
+      padding:7px 14px; border-radius:7px; font-size:13px; font-weight:600;
+      color:var(--muted); transition:.2s; display:flex; align-items:center; gap:6px;
+    }
+    nav ul a:hover, nav ul a.active { color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent); }
+    .nav-controls { display:flex; gap:8px; align-items:center; }
+    .ctrl-btn {
+      padding:6px 14px; border-radius:7px; border:1px solid var(--border);
+      background:var(--surface2); color:var(--text); font-size:12px; font-weight:600;
+      cursor:pointer; transition:.2s; font-family:'IBM Plex Sans',sans-serif;
+    }
+    .ctrl-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* ─── PAGE SECTIONS ─────────────────────────────────── */
+    .page { display:none; padding-top:60px; min-height:100vh; }
+    .page.active { display:block; }
+
+    /* ─── HOME ───────────────────────────────────────────── */
+    .hero {
+      position:relative; overflow:hidden;
+      background: linear-gradient(135deg, var(--bg) 0%, #0d1f35 50%, #0a1628 100%);
+      padding:80px 28px 60px;
+      display:flex; flex-direction:column; align-items:center; text-align:center;
+    }
+    .hero::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232,124,30,.12) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .hero-logo { height:90px; margin-bottom:28px; filter:drop-shadow(0 6px 24px rgba(232,124,30,.35)); }
+    .hero h1 {
+      font-family:'Rajdhani',sans-serif; font-size:clamp(32px,5vw,58px);
+      font-weight:700; color:var(--accent); letter-spacing:.04em; line-height:1.05;
+    }
+    .hero h1 span { color:var(--text); opacity:.8; }
+    .hero-sub {
+      font-size:15px; color:var(--muted); margin:14px 0 36px;
+      max-width:520px; line-height:1.7;
+    }
+    .hero-cards {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:16px; max-width:840px; width:100%;
+    }
+    .hero-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      padding:24px 20px; cursor:pointer; transition:.25s;
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+    }
+    .hero-card:hover { border-color:var(--accent); transform:translateY(-3px);
+                       box-shadow:0 8px 28px rgba(232,124,30,.15); }
+    .hero-card .icon { font-size:32px; }
+    .hero-card h3 { font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:700;
+                    color:var(--text); }
+    .hero-card p { font-size:12px; color:var(--muted); text-align:center; line-height:1.5; }
+
+    /* ─── ABOUT / PROCESS ───────────────────────────────── */
+    .section-wrap { max-width:960px; margin:0 auto; padding:48px 24px; }
+    .section-title {
+      font-family:'Rajdhani',sans-serif; font-size:28px; font-weight:700;
+      color:var(--accent); margin-bottom:8px; letter-spacing:.04em;
+    }
+    .section-sub { font-size:14px; color:var(--muted); margin-bottom:36px; }
+    .process-diagram-wrap {
+      background:var(--surface); border:1px solid var(--border); border-radius:14px;
+      padding:28px; margin-bottom:40px; overflow:auto;
+    }
+    .process-diagram-wrap svg { display:block; margin:0 auto; }
+
+    /* SVG process diagram */
+    .proc-box { fill:var(--surface2); stroke:var(--border); stroke-width:1.5px; rx:6; }
+    .proc-box-main { fill:color-mix(in srgb, var(--accent) 8%, var(--surface2)); stroke:var(--accent); stroke-width:1.8px; }
+    .proc-box-side { fill:color-mix(in srgb, var(--blue) 8%, var(--surface2)); stroke:var(--blue); stroke-width:1.2px; }
+    .proc-text { fill:var(--text); font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:600; text-anchor:middle; }
+    .proc-text-sm { fill:var(--muted); font-family:'IBM Plex Sans',sans-serif; font-size:10px; text-anchor:middle; }
+    .proc-arrow { stroke:var(--muted); stroke-width:1.5; fill:none; marker-end:url(#arr); }
+    .proc-arrow-accent { stroke:var(--accent); stroke-width:1.5; fill:none; marker-end:url(#arrac); }
+    .proc-product { fill:var(--muted); font-family:'IBM Plex Sans',sans-serif; font-size:10px; font-style:italic; }
+
+    .tech-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; }
+    .tech-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      padding:22px; transition:.2s;
+    }
+    .tech-card:hover { border-color:var(--accent); }
+    .tech-card-num {
+      font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600;
+      color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, transparent);
+      padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:10px;
+    }
+    .tech-card h4 { font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700;
+                    color:var(--text); margin-bottom:6px; }
+    .tech-card p { font-size:12px; color:var(--muted); line-height:1.65; }
+    .tech-card .params {
+      margin-top:10px; padding:8px 10px; background:var(--surface2); border-radius:6px;
+      font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--blue);
+    }
+
+    /* ─── EQUIPMENT ─────────────────────────────────────── */
+    .eq-layout { display:grid; grid-template-columns:300px 1fr; gap:0; height:calc(100vh - 60px); }
+    .eq-sidebar {
+      border-right:1px solid var(--border); overflow:hidden;
+      display:flex; flex-direction:column;
+    }
+    .eq-search-wrap {
+      padding:14px; border-bottom:1px solid var(--border);
+      background:var(--surface);
+    }
+    .eq-search {
+      width:100%; padding:9px 12px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); border-radius:8px;
+      font-size:12px; font-family:'IBM Plex Sans',sans-serif; outline:none;
+      transition:.2s;
+    }
+    .eq-search:focus { border-color:var(--accent); }
+    .eq-filters { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    .eq-filter {
+      padding:6px 8px; border:1px solid var(--border); background:var(--bg);
+      color:var(--text); border-radius:6px; font-size:11px;
+      font-family:'IBM Plex Sans',sans-serif; outline:none; cursor:pointer;
+    }
+    .eq-list { flex:1; overflow-y:auto; }
+    .eq-item {
+      padding:10px 14px; border-bottom:1px solid var(--border); cursor:pointer;
+      display:grid; grid-template-columns:100px 1fr 60px; gap:8px; align-items:center;
+      transition:.15s;
+    }
+    .eq-item:hover { background:var(--surface2); }
+    .eq-item.sel { background:color-mix(in srgb, var(--accent) 8%, transparent);
+                   border-left:3px solid var(--accent); }
+    .eq-tag { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; color:var(--text); }
+    .eq-name { font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .eq-weight { font-size:10px; color:var(--muted); text-align:right; }
+    .eq-test-badge {
+      display:inline-flex; align-items:center; gap:3px;
+      padding:2px 7px; border-radius:12px; font-size:9px; font-weight:600;
+    }
+    .badge-derog { background:rgba(249,115,22,.12); color:#fb923c; }
+    .badge-prev  { background:rgba(59,130,246,.12); color:#60a5fa; }
+
+    .eq-detail {
+      overflow-y:auto; padding:28px;
+      background:var(--bg);
+    }
+    .eq-detail-header {
+      display:flex; align-items:flex-start; gap:16px; margin-bottom:24px;
+    }
+    .eq-detail-tag {
+      font-family:'Rajdhani',sans-serif; font-size:32px; font-weight:700; color:var(--accent);
+    }
+    .eq-detail-name { font-size:16px; color:var(--text); font-weight:600; margin-top:2px; }
+    .eq-detail-section-label { font-size:11px; color:var(--muted); }
+    .eq-tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+    .eq-tab {
+      padding:9px 16px; font-size:12px; font-weight:600; border:none;
+      background:none; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent;
+      font-family:'IBM Plex Sans',sans-serif; transition:.2s;
+    }
+    .eq-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+    .eq-tab-content { display:none; }
+    .eq-tab-content.active { display:block; }
+    .spec-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+    .spec-item {
+      background:var(--surface); border:1px solid var(--border); border-radius:8px;
+      padding:14px;
+    }
+    .spec-label { font-size:10px; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:.06em; }
+    .spec-value { font-size:14px; font-weight:600; color:var(--text); font-family:'JetBrains Mono',monospace; }
+    .tool-item { padding:8px 12px; background:var(--surface); border:1px solid var(--border);
+                 border-radius:7px; font-size:12px; color:var(--text); margin-bottom:8px;
+                 display:flex; align-items:center; gap:8px; }
+    .lifting-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:18px; display:flex; flex-direction:column; gap:8px;
+    }
+    .lifting-icon { font-size:36px; }
+    .lifting-label { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:var(--text); }
+    .lifting-sub { font-size:12px; color:var(--muted); }
+    .maint-row { display:flex; justify-content:space-between; padding:12px 0;
+                 border-bottom:1px solid var(--border); }
+    .maint-key { font-size:12px; color:var(--muted); }
+    .maint-val { font-size:12px; font-weight:600; color:var(--text); font-family:'JetBrains Mono',monospace; }
+
+    /* ─── DCS ────────────────────────────────────────────── */
+    .dcs-layout { display:flex; flex-direction:column; height:calc(100vh - 60px); overflow:hidden; }
+    .dcs-search-bar {
+      padding:16px 24px; background:var(--surface); border-bottom:1px solid var(--border);
+      display:flex; gap:12px; align-items:center; flex-shrink:0;
+    }
+    .dcs-search {
+      flex:1; padding:10px 16px; border:1px solid var(--border);
+      background:var(--bg); color:var(--text); border-radius:9px;
+      font-size:13px; font-family:'IBM Plex Sans',sans-serif; outline:none; transition:.2s;
+    }
+    .dcs-search:focus { border-color:var(--accent); }
+    .dcs-hint { font-size:11px; color:var(--muted); }
+    .dcs-grid {
+      flex:1; overflow-y:auto;
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+      gap:16px; padding:20px 24px;
+    }
+    .dcs-card {
+      background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      overflow:hidden; cursor:pointer; transition:.25s;
+    }
+    .dcs-card:hover { border-color:var(--accent); transform:translateY(-2px);
+                      box-shadow:0 6px 24px rgba(0,0,0,.3); }
+    .dcs-card.active { border-color:var(--accent); }
+    .dcs-thumb {
+      width:100%; aspect-ratio:16/10; object-fit:cover;
+      border-bottom:1px solid var(--border); background:var(--surface2);
+      display:flex; align-items:center; justify-content:center; color:var(--muted);
+      font-size:12px;
+    }
+    .dcs-thumb img { width:100%; height:100%; object-fit:cover; }
+    .dcs-card-body { padding:14px; }
+    .dcs-card-title { font-family:'Rajdhani',sans-serif; font-size:15px; font-weight:700; color:var(--accent); margin-bottom:4px; }
+    .dcs-card-desc { font-size:11px; color:var(--muted); margin-bottom:10px; }
+    .dcs-tags { display:flex; flex-wrap:wrap; gap:4px; }
+    .dcs-tag {
+      padding:2px 7px; background:var(--surface2); border:1px solid var(--border);
+      border-radius:4px; font-size:9px; font-family:'JetBrains Mono',monospace;
+      color:var(--muted);
+    }
+    .dcs-tag.match { background:color-mix(in srgb, var(--accent) 15%, transparent);
+                     border-color:var(--accent); color:var(--accent); }
+
+    /* ─── MODAL ─────────────────────────────────────────── */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; z-index:200;
+      background:rgba(0,0,0,.75); align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal {
+      background:var(--surface); border:1px solid var(--border); border-radius:14px;
+      max-width:90vw; max-height:90vh; overflow:hidden; display:flex; flex-direction:column;
+    }
+    .modal-header {
+      padding:16px 20px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .modal-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700; color:var(--accent); }
+    .modal-close { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; }
+    .modal-body { overflow:auto; flex:1; }
+    .modal-body img { width:100%; display:block; }
+    .modal-tags { padding:12px 20px; background:var(--surface2); display:flex; flex-wrap:wrap; gap:6px; }
+
+    /* ─── EMPTY STATE ───────────────────────────────────── */
+    .empty { padding:60px; text-align:center; color:var(--muted); font-size:14px; }
+
+    /* ─── RESPONSIVE ────────────────────────────────────── */
+    @media(max-width:768px) {
+      .eq-layout { grid-template-columns:1fr; }
+      .eq-detail { display:none; }
+      .eq-layout.detail-open .eq-sidebar { display:none; }
+      .eq-layout.detail-open .eq-detail { display:block; }
+      nav ul { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="nav-logo">
+    <img src="app_logo.png" alt="Sonatrach" id="nav-logo-img" />
+    <div class="nav-brand">
+      GNL1Z
+      <span>SONATRACH</span>
+    </div>
+  </div>
+  <ul>
+    <li><a href="#" class="active" data-page="home"    onclick="nav(this,'home')">🏠 <span data-en="Home" data-fr="Accueil">Home</span></a></li>
+    <li><a href="#" data-page="equipment" onclick="nav(this,'equipment')">⚙️ <span data-en="Equipment" data-fr="Équipements">Equipment</span></a></li>
+    <li><a href="#" data-page="dcs"       onclick="nav(this,'dcs')">📋 <span data-en="DCS" data-fr="DCS">DCS</span></a></li>
+    <li><a href="#" data-page="about"     onclick="nav(this,'about')">📘 <span data-en="About GNL1Z" data-fr="À propos de GNL1Z">About GNL1Z</span></a></li>
+  </ul>
+  <div class="nav-controls">
+    <button class="ctrl-btn" onclick="toggleLang()" id="lang-btn">🇫🇷 FR</button>
+    <button class="ctrl-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+  </div>
+</nav>
+
+<!-- ═══════════ HOME PAGE ═══════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <img src="app_logo.png" class="hero-logo" alt="Sonatrach GNL1Z" />
+    <h1>GNL1Z <span data-en="Equipment Manager" data-fr="Gestionnaire Équipements">Equipment Manager</span></h1>
+    <p class="hero-sub" data-en="Complete technical reference for equipment, DCS specifications and process documentation at the GNL1/Z liquefaction complex — Sonatrach."
+                        data-fr="Référence technique complète pour les équipements, spécifications DCS et documentation de procédé au complexe de liquéfaction GNL1/Z — Sonatrach.">
+    </p>
+    <div class="hero-cards">
+      <div class="hero-card" onclick="nav(null,'equipment')">
+        <div class="icon">⚙️</div>
+        <h3 data-en="Equipment" data-fr="Équipements">Equipment</h3>
+        <p data-en="Browse all equipment with technical specs, tools, lifting and maintenance data."
+           data-fr="Parcourir tous les équipements avec specs techniques, outils, levage et maintenance."></p>
+      </div>
+      <div class="hero-card" onclick="nav(null,'dcs')">
+        <div class="icon">📋</div>
+        <h3>DCS GNL1Z</h3>
+        <p data-en="Searchable DCS screen captures with instrument tags from each train."
+           data-fr="Captures DCS recherchables avec tags d'instruments de chaque train."></p>
+      </div>
+      <div class="hero-card" onclick="nav(null,'about')">
+        <div class="icon">📘</div>
+        <h3 data-en="About GNL1Z" data-fr="À propos de GNL1Z">About GNL1Z</h3>
+        <p data-en="Technical process summary: liquefaction, refrigeration cycles, storage and export."
+           data-fr="Résumé technique du procédé : liquéfaction, cycles de réfrigération, stockage et expédition."></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ EQUIPMENT PAGE ═══════════ -->
+<div class="page" id="page-equipment">
+  <div class="eq-layout" id="eq-layout">
+    <!-- Sidebar -->
+    <div class="eq-sidebar">
+      <div class="eq-search-wrap">
+        <input class="eq-search" id="eq-search" placeholder="Search tag, name…" oninput="filterEq()" />
+        <div class="eq-filters">
+          <select class="eq-filter" id="flt-section" onchange="filterEq()">
+            <option value="" data-en="All Sections" data-fr="Toutes sections"></option>
+            <option value="Décarbonatation">Décarbonatation</option>
+            <option value="Déshydratation">Déshydratation</option>
+            <option value="Propane">Propane</option>
+            <option value="MCR">MCR</option>
+            <option value="Liquéfaction">Liquéfaction</option>
+            <option value="Fractionnement">Fractionnement</option>
+          </select>
+          <select class="eq-filter" id="flt-testing" onchange="filterEq()">
+            <option value="" data-en="All Testing" data-fr="Tous tests"></option>
+            <option value="derogation" data-en="⚠️ Derogation" data-fr="⚠️ Dérogation"></option>
+            <option value="preventive" data-en="🔄 Preventive" data-fr="🔄 Préventif"></option>
+          </select>
+        </div>
+      </div>
+      <div class="eq-list" id="eq-list">
+        <!-- filled by JS -->
+      </div>
+    </div>
+    <!-- Detail -->
+    <div class="eq-detail" id="eq-detail">
+      <div class="empty" data-en="← Select an equipment" data-fr="← Sélectionner un équipement">← Select an equipment</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DCS PAGE ═══════════ -->
+<div class="page" id="page-dcs">
+  <div class="dcs-layout">
+    <div class="dcs-search-bar">
+      <input class="dcs-search" id="dcs-search" placeholder="Search tag, instrument, section…" oninput="filterDCS()" />
+      <div class="dcs-hint" data-en="💡 Search by instrument tag (e.g. FIC10519, TIC10612) or section"
+                            data-fr="💡 Rechercher par tag instrument (ex: FIC10519) ou section">💡 Search by instrument tag (e.g. FIC10519, TIC10612) or section</div>
+    </div>
+    <div class="dcs-grid" id="dcs-grid"><!-- filled by JS --></div>
+  </div>
+</div>
+
+<!-- ═══════════ ABOUT PAGE ═══════════ -->
+<div class="page" id="page-about">
+  <div class="section-wrap">
+    <div class="section-title" data-en="GNL1/Z — Technical Process Summary" data-fr="GNL1/Z — Résumé Technique du Procédé">GNL1/Z — Résumé Technique du Procédé</div>
+    <div class="section-sub" data-en="C3-MR liquefaction process — 6 autonomous trains — APCI technology"
+                             data-fr="Procédé de liquéfaction C3-MR — 6 trains autonomes — Technologie APCI">
+    Procédé de liquéfaction C3-MR — 6 trains autonomes — Technologie APCI</div>
+
+    <!-- SVG Process Flow -->
+    <div class="process-diagram-wrap">
+      <svg viewBox="0 0 700 680" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:'Rajdhani',sans-serif;">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="var(--muted)"/>
+          </marker>
+          <marker id="arrac" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="var(--accent)"/>
+          </marker>
+        </defs>
+
+        <!-- INPUT -->
+        <text x="350" y="26" text-anchor="middle" font-size="11" fill="var(--muted)" font-style="italic" font-family="'IBM Plex Sans',sans-serif">Entrée gaz naturel</text>
+        <line x1="350" y1="30" x2="350" y2="55" class="proc-arrow"/>
+
+        <!-- 1. DECARBONATATION -->
+        <rect x="240" y="55" width="220" height="46" rx="6" fill="color-mix(in srgb, var(--accent) 8%, var(--surface2))" stroke="var(--accent)" stroke-width="1.5"/>
+        <text x="350" y="74" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent)" font-family="'Rajdhani',sans-serif">DÉCARBONATATION</text>
+        <text x="350" y="90" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">MEA • T=38°C • P=40 bar</text>
+        <!-- REGEN MEA side -->
+        <rect x="520" y="60" width="150" height="36" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.2"/>
+        <text x="595" y="78" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">RÉGÉNÉRATION MEA</text>
+        <line x1="460" y1="78" x2="520" y2="78" class="proc-arrow"/>
+        <line x1="520" y1="88" x2="460" y2="88" class="proc-arrow"/>
+
+        <!-- Arrow down -->
+        <line x1="350" y1="101" x2="350" y2="126" class="proc-arrow"/>
+
+        <!-- 2. DESHYDRATATION -->
+        <rect x="240" y="126" width="220" height="46" rx="6" fill="color-mix(in srgb, var(--blue) 8%, var(--surface2))" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="350" y="145" text-anchor="middle" font-size="12" font-weight="700" fill="var(--blue)" font-family="'Rajdhani',sans-serif">DÉSHYDRATATION</text>
+        <text x="350" y="161" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">Tamis moléculaires • &lt;1 ppm H₂O</text>
+
+        <line x1="350" y1="172" x2="350" y2="197" class="proc-arrow"/>
+
+        <!-- 3. DEMERCURISATION -->
+        <rect x="240" y="197" width="220" height="46" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="350" y="216" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">DÉMERCURISATION</text>
+        <text x="350" y="232" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">Charbon actif soufré • &lt;0.001 µg/Nm³</text>
+
+        <line x1="350" y1="243" x2="350" y2="268" class="proc-arrow"/>
+
+        <!-- 4. SYSTEME REFROIDISSEMENT (centre) -->
+        <rect x="230" y="268" width="240" height="46" rx="6" fill="color-mix(in srgb, var(--accent) 10%, var(--surface2))" stroke="var(--accent)" stroke-width="1.8"/>
+        <text x="350" y="287" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent)" font-family="'Rajdhani',sans-serif">SYSTÈME DE REFROIDISSEMENT</text>
+        <text x="350" y="303" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">Tour de lavage • -26°C</text>
+
+        <!-- SYSTEME PROPANE side left -->
+        <rect x="30" y="273" width="140" height="36" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.2"/>
+        <text x="100" y="291" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">SYSTÈME PROPANE</text>
+        <line x1="230" y1="283" x2="170" y2="283" class="proc-arrow"/>
+        <line x1="170" y1="296" x2="230" y2="296" class="proc-arrow"/>
+
+        <!-- FRACTIONNEMENT side right -->
+        <rect x="530" y="273" width="140" height="36" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.2"/>
+        <text x="600" y="291" text-anchor="middle" font-size="10" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">FRACTIONNEMENT</text>
+        <line x1="470" y1="284" x2="530" y2="284" class="proc-arrow"/>
+        <!-- products -->
+        <text x="690" y="273" text-anchor="end" font-size="9" fill="var(--muted)" font-style="italic" font-family="'IBM Plex Sans',sans-serif">→ Gazoline</text>
+        <text x="690" y="285" text-anchor="end" font-size="9" fill="var(--muted)" font-style="italic" font-family="'IBM Plex Sans',sans-serif">→ Propane</text>
+        <text x="690" y="297" text-anchor="end" font-size="9" fill="var(--muted)" font-style="italic" font-family="'IBM Plex Sans',sans-serif">→ Butane</text>
+
+        <line x1="350" y1="314" x2="350" y2="338" class="proc-arrow"/>
+
+        <!-- 5. SEPARATION -->
+        <rect x="240" y="338" width="220" height="46" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+        <text x="350" y="357" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">SÉPARATION</text>
+        <text x="350" y="373" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">Séparateur HP</text>
+
+        <line x1="350" y1="384" x2="350" y2="408" class="proc-arrow"/>
+
+        <!-- 6. LIQUEFACTION (key step) -->
+        <rect x="210" y="408" width="280" height="52" rx="6" fill="color-mix(in srgb, var(--accent) 14%, var(--surface2))" stroke="var(--accent)" stroke-width="2"/>
+        <text x="350" y="429" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)" font-family="'Rajdhani',sans-serif">LIQUÉFACTION — E-520</text>
+        <text x="350" y="448" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">40 bar, -110°C → 28 bar, -148°C • MCR</text>
+
+        <!-- COMPRESSEUR FG left -->
+        <rect x="20" y="415" width="140" height="38" rx="5" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.2"/>
+        <text x="90" y="430" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">COMPRESSEUR</text>
+        <text x="90" y="443" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--text)" font-family="'Rajdhani',sans-serif">GAZ COMBUSTIBLE</text>
+        <line x1="210" y1="432" x2="160" y2="432" class="proc-arrow"/>
+
+        <!-- MCR right -->
+        <rect x="540" y="415" width="150" height="38" rx="5" fill="color-mix(in srgb, var(--blue) 8%, var(--surface2))" stroke="var(--blue)" stroke-width="1.2"/>
+        <text x="615" y="430" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--blue)" font-family="'Rajdhani',sans-serif">SYSTÈME</text>
+        <text x="615" y="443" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--blue)" font-family="'Rajdhani',sans-serif">RÉFRIGÉRANT MIXTE</text>
+        <line x1="490" y1="432" x2="540" y2="432" class="proc-arrow"/>
+        <line x1="540" y1="445" x2="490" y2="445" class="proc-arrow"/>
+
+        <!-- line from compresseur up -->
+        <line x1="90" y1="415" x2="90" y2="460" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="4"/>
+        <line x1="90" y1="460" x2="210" y2="460" class="proc-arrow"/>
+
+        <line x1="350" y1="460" x2="350" y2="490" class="proc-arrow"/>
+
+        <!-- 7. STOCKAGE -->
+        <rect x="220" y="490" width="260" height="52" rx="6" fill="color-mix(in srgb, var(--green) 8%, var(--surface2))" stroke="var(--green)" stroke-width="1.8"/>
+        <text x="350" y="511" text-anchor="middle" font-size="12" font-weight="700" fill="var(--green)" font-family="'Rajdhani',sans-serif">STOCKAGE GNL</text>
+        <text x="350" y="530" text-anchor="middle" font-size="9.5" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">3 × 100 000 m³ • T=-162°C • P=1.03 bar</text>
+
+        <!-- vers methaniers -->
+        <line x1="480" y1="516" x2="530" y2="516" class="proc-arrow"/>
+        <text x="535" y="520" text-anchor="start" font-size="10" fill="var(--muted)" font-style="italic" font-family="'IBM Plex Sans',sans-serif">Vers méthaniers</text>
+
+        <!-- legend -->
+        <rect x="20" y="600" width="12" height="12" rx="2" fill="var(--accent)" opacity=".3" stroke="var(--accent)"/>
+        <text x="36" y="611" font-size="9" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif" data-en="Main liquefaction step" data-fr="Étape principale">Étape principale</text>
+        <rect x="160" y="600" width="12" height="12" rx="2" fill="var(--blue)" opacity=".3" stroke="var(--blue)"/>
+        <text x="176" y="611" font-size="9" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">MCR</text>
+        <rect x="240" y="600" width="12" height="12" rx="2" fill="var(--green)" opacity=".3" stroke="var(--green)"/>
+        <text x="256" y="611" font-size="9" fill="var(--muted)" font-family="'IBM Plex Sans',sans-serif">Stockage</text>
+      </svg>
+    </div>
+
+    <!-- Technical cards -->
+    <div class="tech-grid" id="tech-grid"><!-- filled by JS --></div>
+
+    <!-- Conclusion -->
+    <div style="margin-top:36px; padding:20px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:10px;">
+      <p class="section-title" style="font-size:16px; margin-bottom:8px;">🔹 <span data-en="Technical Conclusion" data-fr="Conclusion Technique">Conclusion Technique</span></p>
+      <p style="font-size:13px; color:var(--muted); line-height:1.7;"
+         data-en="The GNL1/Z complex operates on an optimised MCR (Mixed Coolant Cycle) refrigeration cycle with propane pre-cooling, ensuring natural gas liquefaction to -162°C. Each liquefaction train is autonomous, but storage and dispatch areas are shared between all six trains. This scheme is representative of C3-MR (Propane-Mixed Refrigerant) liquefaction technologies, close to APCI (Air Products) processes used in many LNG complexes worldwide."
+         data-fr="Le complexe GNL1/Z fonctionne sur un cycle de réfrigération mixte (MCR) optimisé par un pré-refroidissement au propane, assurant la liquéfaction du gaz naturel à -162°C. Chaque train de liquéfaction est autonome, mais les zones de stockage et d'expédition sont communes aux six trains. Ce schéma est représentatif des technologies de liquéfaction de type C3-MR (Propane-Mixed Refrigerant), proches des procédés APCI (Air Products) utilisés dans de nombreux complexes GNL dans le monde.">
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DCS MODAL ═══════════ -->
+<div class="modal-overlay" id="dcs-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" style="width:900px;">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">DCS Screen</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <img id="modal-img" src="" alt="DCS Screen" />
+    </div>
+    <div class="modal-tags" id="modal-tags"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let lang = 'fr';
+let theme = 'dark';
+let selEq = null;
+
+// ═══════════════════════════════════════════════════════════════
+// EQUIPMENT DATA (from your CSV + Excel files)
+// ═══════════════════════════════════════════════════════════════
+const EQUIPMENT = [
+  { tag:"101-F-501", name:"Régénérateur de MEA", type:"F", section:"Décarbonatation", weight_kg:22950, volume_m3:27, pressure:"8.4 Bars", serial:"35959-6", testing:"derogation", last_tested:"2024-01-15", next_test:"2025-01-15", bolt:"M20", tools:['Clé à frap 1 3/16"','Racloir de joint','Jauge de niveau','Clé torque 1 1/2"'], lifting:"heavy_lift", subsections:{material:"Carbon Steel", design_temp:"150°C", corrosion_allow:"2.4mm", insulation:"150mm Rock Wool"} },
+  { tag:"101-F-502", name:"Absorbeur de MEA", type:"F", section:"Décarbonatation", weight_kg:147050, volume_m3:173, pressure:"81 Bars", serial:"35960-6", testing:"derogation", last_tested:"2024-01-15", next_test:"2025-01-15", bolt:"M24", tools:['Clé à frap 1 7/16"','Clé à choc pneumatique 3/4"','Racloir de joint'], lifting:"heavy_lift", subsections:{material:"Carbon Steel HIC resist.", design_temp:"65°C", height:"55.8m", diameter:"5.5m"} },
+  { tag:"X01-E-501", name:"Condenseur de tête", type:"E", section:"Décarbonatation", weight_kg:600, volume_m3:0, pressure:"8.6 Bars", serial:"35959-6", testing:"preventive", last_tested:"2024-02-20", next_test:"2024-08-20", bolt:"M16", tools:['Clé à frap 15/16"','Racloir de joint','Kit nettoyage tubes'], lifting:"chain_hoist_2t", subsections:{type:"Shell & Tube", tube_material:"Stainless 304", surface:"850 m²"} },
+  { tag:"X01-E-502", name:"Rebouilleur de MEA", type:"E", section:"Décarbonatation", weight_kg:600, volume_m3:0, pressure:"7.2 Bars", serial:"35961-6", testing:"preventive", last_tested:"2024-02-20", next_test:"2024-08-20", bolt:"M16", tools:['Clé à frap 15/16"','Racloir de joint'], lifting:"chain_hoist_2t", subsections:{type:"Kettle Reboiler", heat_duty:"8.5 MW"} },
+  { tag:"X01-E-503", name:"Échangeur MEA Lean/Rich", type:"E", section:"Décarbonatation", weight_kg:600, volume_m3:0, pressure:"8.6 Bars", serial:"35962-6", testing:"preventive", last_tested:"2024-02-20", next_test:"2024-08-20", bolt:"M16", tools:['Clé à frap 15/16"'], lifting:"chain_hoist_2t", subsections:{type:"Shell & Tube"} },
+  { tag:"X01-G-507", name:"Flash Drum MEA", type:"G", section:"Décarbonatation", weight_kg:300, volume_m3:0, pressure:"7.8 Bars", serial:"V-2089-F", testing:"preventive", last_tested:"2024-01-15", next_test:"2025-01-15", bolt:"M16", tools:['Clé à frap 15/16"','Racloir de joint'], lifting:"chain_hoist_2t", subsections:{orientation:"Horizontal"} },
+  { tag:"X01-E-506", name:"Feed Gas Pre-Heater", type:"E", section:"Décarbonatation", weight_kg:600, volume_m3:0, pressure:"15.5 Bars", serial:"387704-6", testing:"preventive", last_tested:"2024-03-01", next_test:"2024-09-01", bolt:"M16", tools:['Clé à frap 15/16"','Socket thermowell'], lifting:"chain_hoist_2t", subsections:{heat_duty:"2.5 MW", inlet_temp:"20°C", outlet_temp:"50°C"} },
+  { tag:"103-K-01.10", name:"Compresseur Propane", type:"K", section:"Propane", weight_kg:25000, volume_m3:0, pressure:"62 Bars", serial:"", testing:"derogation", last_tested:"2023-09-01", next_test:"2024-09-01", bolt:"M24", tools:['Clé à frap 1 7/16"','Clé à choc pneumatique 1"','Tensiomètre courroie'], lifting:"heavy_lift", subsections:{stages:"3 étages", driver:"Turbine vapeur", speed:"4578 RPM"} },
+  { tag:"105-K-01.20", name:"Compresseur MCR I", type:"K", section:"MCR", weight_kg:30000, volume_m3:0, pressure:"45 Bars", serial:"", testing:"derogation", last_tested:"2023-10-01", next_test:"2024-10-01", bolt:"M24", tools:['Clé à frap 1 7/16"','Clé à choc pneumatique 1"'], lifting:"heavy_lift", subsections:{stages:"2 étages", RPM:"4846 RPM", driver:"Turbine vapeur"} },
+  { tag:"105-K-01.21", name:"Compresseur MCR II", type:"K", section:"MCR", weight_kg:30000, volume_m3:0, pressure:"45 Bars", serial:"", testing:"derogation", last_tested:"2023-10-01", next_test:"2024-10-01", bolt:"M24", tools:['Clé à frap 1 7/16"','Clé à choc pneumatique 1"'], lifting:"heavy_lift", subsections:{stages:"2 étages", RPM:"4869 RPM", driver:"Turbine vapeur"} },
+  { tag:"106-E-05.20", name:"Échangeur Principal E-520", type:"E", section:"Liquéfaction", weight_kg:180000, volume_m3:0, pressure:"45 Bars", serial:"E520", testing:"derogation", last_tested:"2023-06-01", next_test:"2026-06-01", bolt:"M30", tools:['Clé à frap 1 13/16"','Grue 51 tonne requis'], lifting:"heavy_lift", subsections:{type:"Spiral Wound", inlet:"40 bar / -110°C", outlet:"28 bar / -148°C", refrigerant:"MCR"} },
+  { tag:"106-G-07.83", name:"Ballon Flash N₂", type:"G", section:"Liquéfaction", weight_kg:500, volume_m3:0, pressure:"1.5 Bars", serial:"G07.83", testing:"preventive", last_tested:"2024-01-20", next_test:"2025-01-20", bolt:"M12", tools:['Clé à frap 3/4"','Racloir de joint'], lifting:"chain_hoist_2t", subsections:{service:"N₂ removal", temperature:"-158°C"} },
+  { tag:"109-F-07.41", name:"Dépropaniseur", type:"F", section:"Fractionnement", weight_kg:12000, volume_m3:0, pressure:"14.5 Bars", serial:"", testing:"preventive", last_tested:"2024-01-15", next_test:"2025-01-15", bolt:"M20", tools:['Clé à frap 1 3/16"','Racloir de joint'], lifting:"heavy_lift", subsections:{service:"C3 separation", trays:"40 plateaux"} },
+  { tag:"110-F-07.51", name:"Débutaniseur", type:"F", section:"Fractionnement", weight_kg:10000, volume_m3:0, pressure:"7.5 Bars", serial:"", testing:"preventive", last_tested:"2024-01-15", next_test:"2025-01-15", bolt:"M20", tools:['Clé à frap 1 3/16"','Racloir de joint'], lifting:"heavy_lift", subsections:{service:"C4+ separation"} },
+  { tag:"102-K-01.30", name:"Compresseur Fuel Gas", type:"K", section:"Utilities", weight_kg:20000, volume_m3:0, pressure:"12 Bars", serial:"KT-130", testing:"derogation", last_tested:"2023-11-01", next_test:"2024-11-01", bolt:"M24", tools:['Clé à frap 1 7/16"','Clé à choc pneumatique 1"'], lifting:"heavy_lift", subsections:{RPM:"6374 RPM", driver:"Moteur électrique"} },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// DCS DATA — Real Google Drive files from your DCS folder
+// ═══════════════════════════════════════════════════════════════
+const DCS = [
+  { id:"dcs-gt", title:"Vue Générale du Procédé", section:"General", fileId:"1iQjxrGDQmNsaBiEYa-p4Eka6o91jc4V3",
+    tags:["101-F502","101-F501","102-R03","101-G-507","104-E05","106-E05","106-G07","104-F07","103-K01","105-K01","VUE GENERALE","PROCEDE","GNL"] },
+  { id:"dcs-t100", title:"Train 100 — Operating Data", section:"Train 100", fileId:"1iujC-rgEHaVOikAnFnNDQkaY78pFyRVg",
+    tags:["FIQ-101-05","FI-101-05","PIC-101-04","TI-101-141","FIQ-102-219","102-K-03.01","FIQ-104-49","PI-104-12","TIC-104-42","FI-106-13","FIC-106-15","LI-106-08","PI-106-10","FIQ-106-16","E-05.04","E-520","G-07.83","KT-110","KT-120","TRAIN 100"] },
+  { id:"dcs-t200", title:"Train 200 — Operating Data", section:"Train 200", fileId:"14fc85LCC1CIo5a4_an6XGvFd_4EDEbc-",
+    tags:["FIQ-201-05","FI-201-05","PIC-201-04","TI-201-141","FIQ-202-219","102-K-03.01","FIQ-204-49","TIC-204-42","FI-206-13","FIC-206-15","LI-206-08","PI-206-10","FIQ-206-16","TRAIN 200"] },
+  { id:"dcs-t300", title:"Train 300 — Operating Data", section:"Train 300", fileId:"18CcolGOL-ZEqkUdj-PDE6fP0wewZGNMi",
+    tags:["FIQ-301-05","FI-301-05","PIC-301-04","TIC-304-42","FI-306-13","FIC-306-15","LI-306-08","PI-306-10","TRAIN 300"] },
+  { id:"dcs-t500", title:"Train 500 — Operating Data", section:"Train 500", fileId:"1nINTgtgIwfob--3n77jDVY4Y8AySSnkA",
+    tags:["FIQ-501-05","FI-501-05","PIC-501-04","TIC-504-42","FI-506-13","FIC-506-15","LI-506-08","PI-506-10","CRIC-505-06","FIQ-507-04","TRAIN 500"] },
+  { id:"dcs-t600", title:"Train 600 — Operating Data", section:"Train 600", fileId:"1Gdd6MKtg8tiPvin8bqkCc3GzEq9AyyE2",
+    tags:["FIQ-601-05","FI-601-05","PIC-601-04","TIC-604-42","FI-606-13","FIC-606-15","LI-606-08","PI-606-10","TV-606-12","FIQ-607-04","TRAIN 600"] },
+  { id:"dcs-c3-1", title:"Propane — Compresseur I", section:"Propane", fileId:"1VDBIAuIPFMpJciRysH3mHQgI4ekXAUcL",
+    tags:["103-K01.10","104-G07.90","104-G07.91","TIC10304","FIC10301","AI106164","SI103231A","PIC103114A","FIC10314","COMPRESSEUR PROPANE","C3"] },
+  { id:"dcs-c3-2", title:"Propane — Bouclage II", section:"Propane", fileId:"1Mfn71tgKTWKDes60E9K9gIKHNp8fWnko",
+    tags:["103-E05.14","103-F05.16","103-G07.86","104-G07.90","104-G07.91","PIC10400","LIC10401","FIC10428","EAU DE MER","BOUCLE PROPANE II","C3 VAPEUR"] },
+  { id:"dcs-c3-3", title:"Propane — Bouclage III", section:"Propane", fileId:"1llBWUC6JRbuyX-NaH4g5UueDMI0JmhPh",
+    tags:["103-E05.13","104-G07.85","104-G07.90","104-G07.91","104-E05.22","104-E05.24","104-E05.26","LIC10435","LIC10440","TI104104","TI104103","BOUCLE PROPANE III"] },
+  { id:"dcs-mcr1", title:"MCR — Compresseur I", section:"MCR", fileId:"1MqVEqPzgwnFnAWixcB9dQJYqsBBoMezw",
+    tags:["105-K01.20","105-K01.20T","105-G07.88","105-G07.89","FIC10519","FIC10503","FIC10504","SIC105231","PI10515A","PI10515B","TI105101","TI105102","AI106164","COMPRESSEUR MCR I"] },
+  { id:"dcs-mcr2", title:"MCR — Compresseur II", section:"MCR", fileId:"1L70xNsbAwdVEtxuSSu-26qc8LNMlb8da",
+    tags:["105-K01.20","105-G07.88","105-G07.89","PI10515A","PI10515B","FIC10519","TI105101","TI105102","COMPRESSEUR MCR I","N2 %","C1 %","C2 %","C3 %"] },
+  { id:"dcs-mcr3", title:"MCR — Compresseur II (detail)", section:"MCR", fileId:"16-jYR0A_cEiTrIMyj7FxWY3bgM7-G3r2",
+    tags:["105-K01.21","105-K01.21T","106-G07.80","SIC105331","PI10523A","PI10523B","FIC10529","TI105104","TI104113","C3 LP","C3 M.P","COMPRESSEUR MCR II","EAU DE MER"] },
+  { id:"dcs-liq1", title:"Liquéfaction I — E-520", section:"Liquéfaction", fileId:"1S5Kz4g-u_JmUqedZUwhMZ3AFUcZsq5Wb",
+    tags:["106-E05.20","106-G07.80","106-G07.83","104-E05.40","PI10626A","PI10628A","FIC10615","FIC10613","CRIC10506","HIC10601","HIC10602","HIC10603","TI106113","TI106114","TI106115","TI106117","LIQUEFACTION I","MCR"] },
+  { id:"dcs-liq2", title:"Liquéfaction II — Flash N₂", section:"Liquéfaction", fileId:"1gqGGdfzg4nP3cAHvatgpHkbvmeLIS66s",
+    tags:["106-G07.83","106-E05.20","104-E05.40","TIC10612","TIC10611","TI106120","TI106121","TI106123","PIC10610","LIC10605","FI10616A","BACS GNL","106-J10.20","LIQUEFACTION II","N2 %"] },
+  { id:"dcs-fg1", title:"Fuel Gas — Système Principal", section:"Utilities", fileId:"1VS_X-cX_hLuxXhQKMEMbxKL1r3nFroeE",
+    tags:["102-K01.30","102-K01.30T","102-G03.14","102-E03.16","103-E05.15","SI10284","FIC10247","PIC10252","TIC102142","TI102123","TI102124","TI10287","COMPRESSEUR FUEL GAZ","FUEL GAZ"] },
+  { id:"dcs-fg2", title:"Fuel Gas — Console Huile", section:"Utilities", fileId:"1pdCPONMVJBMS102khxB6SrkHSwMjAPt3",
+    tags:["102K130RJ1","102K130RJ2","102K130RJ3","PDAH11138A","PDI11138","PI11141A","TI111100","CONSOLE HUILE","KT 130"] },
+  { id:"dcs-gpl", title:"Échangeur Récupération GPL", section:"Fractionnement", fileId:"15nKWgoHdmbHC8VIU6EkggaQrmOhvWOdE",
+    tags:["104-E05.23","106-E05.20","104-G07.14","PIC10461","FIC104128","TIC10470","AI106164","MCR","GPL","N2 %","C1 %","C2 %","C3 %"] },
+  { id:"dcs-depr", title:"Dépropaniseur", section:"Fractionnement", fileId:"1HQIPVBNXgo2tYyeRnYYvEtSEJWTbX00c",
+    tags:["109-F07.41","109-G07.44","109-E07.42","109-E07.43","109-J07.45","110-F07.51","PIC10912","PIC10901","LIC10914","LIC10916","TIC10902","FIC10910","AI107115","DEPROPANISEUR","C3","PROPANE"] },
+  { id:"dcs-cond", title:"Retour Condensats Trains", section:"Utilities", fileId:"10PSTETdaNSFXqNpRVh_h19-w9ol99nxu",
+    tags:["105-E-301","105-E-302","105-E-313","105-E-319","105-J301","105-J302","105-J303","105-J304","103-J325","103-J326","103-J337","103-J338","101-G-506","101-J507","FI710190","LIC10034","LIC10051","LIC10068","RETOURS CONDENSATS"] },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// TECH CARDS DATA (EN/FR)
+// ═══════════════════════════════════════════════════════════════
+const TECH = [
+  { num:"01", en:{h:"Décarbonatation (MEA)", p:"CO₂ removal by absorption in 15% aqueous monoethanolamine solution, then MEA regeneration.", params:"T = 38°C • P = 40 bar"}, fr:{h:"Décarbonatation (MEA)", p:"Élimination du CO₂ par absorption dans une solution aqueuse de monoéthanolamine (15%), puis régénération de la MEA.", params:"T = 38°C • P = 40 bar"} },
+  { num:"02", en:{h:"Dehydration (Mol. Sieves)", p:"Water vapour removal by adsorption to prevent ice formation in cryogenic equipment.", params:"H₂O < 1 ppm"}, fr:{h:"Déshydratation (Tamis Mol.)", p:"Élimination de la vapeur d'eau par adsorption pour éviter la formation de glace dans les équipements cryogéniques.", params:"H₂O < 1 ppm"} },
+  { num:"03", en:{h:"Demercurisation (Hg)", p:"Mercury adsorption on sulphur-impregnated activated carbon to protect aluminium heat exchangers.", params:"Hg < 0.001 µg/Nm³"}, fr:{h:"Démercurisation (Hg)", p:"Adsorption du mercure sur charbon actif imprégné de soufre pour protéger les échangeurs en aluminium.", params:"Hg < 0.001 µg/Nm³"} },
+  { num:"04", en:{h:"Scrub Tower & Fractionation", p:"Natural gas cooled to -26°C in scrub tower; C₂+, C₃+, C₄+ are condensed then sequentially distilled.", params:"T = -26°C • C₂, C₃, C₄ products"}, fr:{h:"Tour de Lavage & Fractionnement", p:"Le gaz naturel est refroidi à -26°C ; les C₂+, C₃+, C₄+ sont condensés puis distillés séquentiellement.", params:"T = -26°C • Produits C₂, C₃, C₄"} },
+  { num:"05", en:{h:"Propane Pre-cooling", p:"Three-stage propane refrigeration cycle pre-cools the feed gas and the MCR before the main exchanger.", params:"T = -37°C • P = 3–13 bar"}, fr:{h:"Pré-refroidissement Propane", p:"Cycle de réfrigération au propane à 3 étages pré-refroidit le gaz et le MCR avant l'échangeur principal.", params:"T = -37°C • P = 3-13 bar"} },
+  { num:"06", en:{h:"Main Liquefaction — E-520", p:"Treated natural gas liquefied in a large spiral-wound heat exchanger (MCHE) using MCR.", params:"In: 40 bar -110°C → Out: 28 bar -148°C"}, fr:{h:"Liquéfaction Principale — E-520", p:"Le GNT est liquéfié dans un grand échangeur spiralé (MCHE) utilisant le MCR.", params:"Entrée: 40 bar -110°C → Sortie: 28 bar -148°C"} },
+  { num:"07", en:{h:"N₂ Flash Drum — G-07.83", p:"Gas-liquid mixture is expanded: 1st to 1.5 bar -158°C, 2nd to 0.35 bar. Nitrogen is eliminated by vaporisation.", params:"P₁ = 1.5 bar • P₂ = 0.35 bar • T = -162°C"}, fr:{h:"Ballon Flash N₂ — G-07.83", p:"Le mélange est détendu : 1ère détente 1,5 bar -158°C, 2e détente 0,35 bar. L'azote est éliminé par vaporisation.", params:"P₁ = 1,5 bar • P₂ = 0,35 bar • T = -162°C"} },
+  { num:"08", en:{h:"LNG Storage & Export", p:"LNG pumped to 3 cryogenic tanks of 100,000 m³ each. Transfer to LNG tankers via 2 jetties with 5 loading arms each.", params:"T = -162°C • P = 1.03 bar • 10,000 m³/h"}, fr:{h:"Stockage & Expédition GNL", p:"Le GNL est pompé vers 3 réservoirs cryogéniques de 100 000 m³ chacun puis transféré vers les navires méthaniers.", params:"T = -162°C • P = 1,03 bar • 10 000 m³/h"} },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// LIFTING DATABASE
+// ═══════════════════════════════════════════════════════════════
+const LIFTING = {
+  manual:        { en:"Manual lift",           fr:"Levage manuel", icon:"🚶", detail_en:"2-person manual lift", detail_fr:"Levage 2 personnes" },
+  manual_hoist:  { en:"Palan 1t",              fr:"Palan 1t",      icon:"🪝", detail_en:"1-ton chain hoist + slings", detail_fr:"Palan 1 tonne + sangles tissu" },
+  chain_hoist_2t:{ en:"Chain hoist 2t",        fr:"Grue chaîne 2t",icon:"🏗️", detail_en:"2-ton chain hoist + spreader bar + metallic sling", detail_fr:"Grue chaîne 2t + barre d'écartement + sangle métallique" },
+  chain_hoist_5t:{ en:"Chain hoist 5t",        fr:"Grue lourde 5t", icon:"🏗️", detail_en:"5-ton hoist + heavy rigging frame", detail_fr:"Grue 5t + cadre de gréement lourd" },
+  heavy_lift:    { en:"Crane 51 tonnes",        fr:"Grue 51 tonnes", icon:"⚠️", detail_en:"External crane 51t + licensed operator + rigging plan", detail_fr:"Grue externe 51t + opérateur autorisé + plan de gréement" },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// NAV / THEME / LANG
+// ═══════════════════════════════════════════════════════════════
+function nav(el, page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('nav ul a').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === page);
+  });
+  if(page === 'about') buildTechCards();
+  if(page === 'dcs') renderDCS(DCS);
+}
+
+function toggleLang() {
+  lang = lang === 'fr' ? 'en' : 'fr';
+  document.getElementById('lang-btn').textContent = lang === 'fr' ? '🇬🇧 EN' : '🇫🇷 FR';
+  document.documentElement.lang = lang;
+  applyLang();
+  if(selEq) renderDetail(selEq);
+  buildTechCards();
+}
+
+function applyLang() {
+  // All elements with data-en / data-fr
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = lang === 'en' ? el.dataset.en : el.dataset.fr;
+  });
+  // select options
+  document.querySelectorAll('[data-page="equipment"] .eq-filter option[data-en]').forEach(opt => {
+    opt.textContent = lang === 'en' ? opt.dataset.en : opt.dataset.fr;
+  });
+}
+
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  document.body.classList.toggle('light', theme === 'light');
+  document.getElementById('theme-btn').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EQUIPMENT
+// ═══════════════════════════════════════════════════════════════
+function renderEqList(items) {
+  const ul = document.getElementById('eq-list');
+  ul.innerHTML = '';
+  if (!items.length) { ul.innerHTML = `<div class="empty">No equipment found</div>`; return; }
+  items.forEach(eq => {
+    const d = document.createElement('div');
+    d.className = 'eq-item' + (selEq?.tag === eq.tag ? ' sel' : '');
+    d.innerHTML = `
+      <div class="eq-tag">${eq.tag}</div>
+      <div class="eq-name" title="${eq.name}">${eq.name}</div>
+      <div class="eq-weight">${eq.weight_kg >= 1000 ? (eq.weight_kg/1000).toFixed(0)+'t' : eq.weight_kg+'kg'}</div>
+    `;
+    d.onclick = () => selectEq(eq);
+    ul.appendChild(d);
+  });
+}
+
+function selectEq(eq) {
+  selEq = eq;
+  document.querySelectorAll('.eq-item').forEach(el => el.classList.remove('sel'));
+  const items = document.querySelectorAll('.eq-item');
+  items.forEach(el => { if(el.querySelector('.eq-tag')?.textContent === eq.tag) el.classList.add('sel'); });
+  renderDetail(eq);
+}
+
+function renderDetail(eq) {
+  const lifting = LIFTING[eq.lifting] || LIFTING.manual;
+  const tl = lang==='en';
+  const html = `
+    <div class="eq-detail-header">
+      <div>
+        <div class="eq-detail-tag">${eq.tag}</div>
+        <div class="eq-detail-name">${eq.name}</div>
+        <div class="eq-detail-section-label">${eq.section} • ${eq.type} • <span style="color:${eq.testing==='derogation'?'#fb923c':'#60a5fa'}">${eq.testing==='derogation'?(tl?'⚠️ Derogation':'⚠️ Dérogation'):(tl?'🔄 Preventive':'🔄 Préventif')}</span></div>
+      </div>
+    </div>
+
+    <div class="eq-tabs">
+      <button class="eq-tab active" onclick="switchTab(this,'tab-details')">📋 ${tl?'Details':'Détails'}</button>
+      <button class="eq-tab" onclick="switchTab(this,'tab-tools')">🔧 ${tl?'Tools':'Outils'}</button>
+      <button class="eq-tab" onclick="switchTab(this,'tab-lifting')">🏗️ ${tl?'Lifting':'Levage'}</button>
+      <button class="eq-tab" onclick="switchTab(this,'tab-maint')">📅 ${tl?'Maintenance':'Maintenance'}</button>
+    </div>
+
+    <div class="eq-tab-content active" id="tab-details">
+      <div class="spec-grid">
+        <div class="spec-item"><div class="spec-label">${tl?'Weight':'Poids'}</div><div class="spec-value">${eq.weight_kg.toLocaleString()} kg</div></div>
+        <div class="spec-item"><div class="spec-label">${tl?'Volume':'Volume'}</div><div class="spec-value">${eq.volume_m3||'—'} m³</div></div>
+        <div class="spec-item"><div class="spec-label">${tl?'Test Pressure':'Pression test'}</div><div class="spec-value">${eq.pressure}</div></div>
+        <div class="spec-item"><div class="spec-label">${tl?'Serial':'N° Série'}</div><div class="spec-value">${eq.serial||'—'}</div></div>
+        <div class="spec-item"><div class="spec-label">${tl?'Bolt Size':'Boulon'}</div><div class="spec-value">${eq.bolt}</div></div>
+        <div class="spec-item"><div class="spec-label">${tl?'Section':'Section'}</div><div class="spec-value" style="font-size:11px">${eq.section}</div></div>
+        ${Object.entries(eq.subsections||{}).map(([k,v])=>`<div class="spec-item"><div class="spec-label">${k.replace(/_/g,' ')}</div><div class="spec-value" style="font-size:11px">${v}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="eq-tab-content" id="tab-tools">
+      <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">${tl?`Bolt: ${eq.bolt} → Wrench: ${wrenchSize(eq.bolt)}`:`Boulon: ${eq.bolt} → Clé: ${wrenchSize(eq.bolt)}`}</p>
+      ${(eq.tools||[]).map(t=>`<div class="tool-item">🔧 ${t}</div>`).join('')}
+    </div>
+
+    <div class="eq-tab-content" id="tab-lifting">
+      <div class="lifting-card">
+        <div class="lifting-icon">${lifting.icon}</div>
+        <div class="lifting-label">${tl ? lifting.en : lifting.fr}</div>
+        <div class="lifting-sub" style="font-family:'JetBrains Mono',monospace;font-size:11px;">${tl ? lifting.detail_en : lifting.detail_fr}</div>
+        <div class="lifting-sub">${eq.weight_kg.toLocaleString()} kg</div>
+      </div>
+      <div style="margin-top:12px;padding:12px;background:var(--surface2);border-radius:8px;font-size:11px;color:var(--muted);">
+        ⚠️ ${tl?'Ensure proper rigging plan, safety zone and certified operators.':'Assurer un plan de gréement, zone de sécurité et opérateurs certifiés.'}
+      </div>
+    </div>
+
+    <div class="eq-tab-content" id="tab-maint">
+      <div class="maint-row"><span class="maint-key">${tl?'Testing Type':'Type de Test'}</span><span class="maint-val" style="color:${eq.testing==='derogation'?'#fb923c':'#60a5fa'}">${eq.testing==='derogation'?(tl?'Derogation':'Dérogation'):(tl?'Preventive Re-test':'Re-test Préventif')}</span></div>
+      <div class="maint-row"><span class="maint-key">${tl?'Last Tested':'Dernier Test'}</span><span class="maint-val">${eq.last_tested}</span></div>
+      <div class="maint-row"><span class="maint-key">${tl?'Next Test Due':'Prochain Test'}</span><span class="maint-val" style="color:${testDue(eq.next_test)}">${eq.next_test}</span></div>
+    </div>
+  `;
+  document.getElementById('eq-detail').innerHTML = html;
+}
+
+function switchTab(btn, id) {
+  document.querySelectorAll('.eq-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.eq-tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+}
+
+function wrenchSize(bolt) {
+  const sizes = { M12:'3/4"', M16:'15/16"', M20:'1 3/16"', M24:'1 7/16"', M30:'1 13/16"' };
+  return sizes[bolt] || bolt;
+}
+
+function testDue(date) {
+  const d = new Date(date), now = new Date();
+  const diff = (d - now) / (1000*60*60*24);
+  return diff < 0 ? '#f87171' : diff < 90 ? '#fb923c' : '#34d399';
+}
+
+function filterEq() {
+  const s = document.getElementById('eq-search').value.toLowerCase();
+  const sec = document.getElementById('flt-section').value;
+  const tst = document.getElementById('flt-testing').value;
+  const result = EQUIPMENT.filter(eq =>
+    (!s || eq.tag.toLowerCase().includes(s) || eq.name.toLowerCase().includes(s)) &&
+    (!sec || eq.section === sec) &&
+    (!tst || eq.testing === tst)
+  );
+  renderEqList(result);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DCS
+// ═══════════════════════════════════════════════════════════════
+function renderDCS(items) {
+  const grid = document.getElementById('dcs-grid');
+  const q = document.getElementById('dcs-search').value.toLowerCase();
+  grid.innerHTML = '';
+  if (!items.length) { grid.innerHTML = `<div class="empty">No DCS screens found</div>`; return; }
+  items.forEach(dcs => {
+    const imgUrl = `https://drive.google.com/thumbnail?id=${dcs.fileId}&sz=w600`;
+    const tagsHtml = dcs.tags.map(t => {
+      const match = q && t.toLowerCase().includes(q);
+      return `<span class="dcs-tag${match?' match':''}">${t}</span>`;
+    }).join('');
+    const d = document.createElement('div');
+    d.className = 'dcs-card';
+    d.innerHTML = `
+      <div class="dcs-thumb"><img src="${imgUrl}" alt="${dcs.title}" loading="lazy" onerror="this.parentElement.innerHTML='<span>📋 ${dcs.title}</span>'" /></div>
+      <div class="dcs-card-body">
+        <div class="dcs-card-title">${dcs.title}</div>
+        <div class="dcs-card-desc">${dcs.section}</div>
+        <div class="dcs-tags">${tagsHtml}</div>
+      </div>
+    `;
+    d.onclick = () => openModal(dcs);
+    grid.appendChild(d);
+  });
+}
+
+function filterDCS() {
+  const q = document.getElementById('dcs-search').value.toLowerCase();
+  if (!q) { renderDCS(DCS); return; }
+  const filtered = DCS.filter(d =>
+    d.title.toLowerCase().includes(q) ||
+    d.section.toLowerCase().includes(q) ||
+    d.tags.some(t => t.toLowerCase().includes(q))
+  );
+  renderDCS(filtered);
+}
+
+function openModal(dcs) {
+  document.getElementById('modal-title').textContent = dcs.title;
+  document.getElementById('modal-img').src = `https://drive.google.com/uc?export=view&id=${dcs.fileId}`;
+  document.getElementById('modal-tags').innerHTML = dcs.tags.map(t=>`<span class="dcs-tag">${t}</span>`).join('');
+  document.getElementById('dcs-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('dcs-modal').classList.remove('open');
+  document.getElementById('modal-img').src = '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TECH CARDS
+// ═══════════════════════════════════════════════════════════════
+function buildTechCards() {
+  const grid = document.getElementById('tech-grid');
+  if (!grid) return;
+  grid.innerHTML = TECH.map(card => {
+    const d = lang==='en' ? card.en : card.fr;
+    return `
+      <div class="tech-card">
+        <div class="tech-card-num">${card.num}</div>
+        <h4>${d.h}</h4>
+        <p>${d.p}</p>
+        <div class="params">${d.params}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+renderEqList(EQUIPMENT);
+applyLang();
+buildTechCards();
+</script>
+</body>
+</html>
