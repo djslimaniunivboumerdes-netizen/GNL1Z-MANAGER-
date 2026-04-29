@@ -4,7 +4,7 @@ cat << 'EOF' > index.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GNL1Z Asset Manager</title>
+    <title>GNL1Z Asset Manager Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,18 +19,19 @@ cat << 'EOF' > index.html
     <style>
         .hidden-view { display: none !important; }
         /* Guaranteed high-contrast color scheme */
+        body { transition: background-color 0.3s, color 0.3s; }
         .light body { background-color: #f8fafc; color: #0f172a; }
         .light .card-bg { background-color: #ffffff; border-color: #cbd5e1; }
-        .light .text-muted { color: #475569; }
+        .light .text-muted { color: #334155; }
         
         .dark body { background-color: #020617; color: #f8fafc; }
         .dark .card-bg { background-color: #0f172a; border-color: #1e293b; }
-        .dark .text-muted { color: #94a3b8; }
+        .dark .text-muted { color: #cbd5e1; }
     </style>
 </head>
-<body class="font-sans min-h-screen transition-colors duration-300">
+<body class="font-sans min-h-screen">
 
-    <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-[#020617]/90 backdrop-blur border-b border-gray-300 dark:border-gray-800 px-4 py-3 flex justify-between items-center shadow-sm">
+    <nav class="fixed top-0 w-full z-50 bg-white/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-300 dark:border-slate-800 px-4 py-3 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-3">
             <div class="bg-sonaOrange p-1 rounded shadow-md">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Sonatrach.svg/1200px-Sonatrach.svg.png" class="h-6" alt="Sonatrach">
@@ -38,8 +39,8 @@ cat << 'EOF' > index.html
             <span class="font-black tracking-tight text-xl">GNL1Z <span class="text-sonaOrange">Manager</span></span>
         </div>
         <div class="flex gap-2">
-            <button onclick="toggleTheme()" class="p-2 rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 transition text-lg">🌓</button>
-            <button onclick="toggleLang()" id="lang-btn" class="px-3 py-1 font-bold rounded-lg border border-gray-300 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-800 transition">EN</button>
+            <button onclick="toggleTheme()" class="p-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 transition text-lg">🌓</button>
+            <button onclick="toggleLang()" id="lang-btn" class="px-3 py-1 font-bold rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 transition">EN</button>
         </div>
     </nav>
 
@@ -49,41 +50,36 @@ cat << 'EOF' > index.html
             <div class="grid grid-cols-1 gap-4">
                 <button onclick="nav('about')" class="card-bg p-6 rounded-xl border flex flex-col text-left hover:border-sonaOrange hover:shadow-lg transition">
                     <h3 class="text-sonaOrange font-bold text-xl mb-1" id="t-menu-about">À propos du Procédé GNL1Z</h3>
-                    <p class="text-sm text-muted" id="t-desc-about">Description technique et flux (C3-MR)</p>
+                    <p class="text-sm text-muted" id="t-desc-about">Description technique, flux (C3-MR) et traitement</p>
                 </button>
                 <button onclick="nav('equip')" class="card-bg p-6 rounded-xl border flex flex-col text-left hover:border-sonaOrange hover:shadow-lg transition">
                     <h3 class="text-sonaOrange font-bold text-xl mb-1" id="t-menu-list">Liste des Équipements</h3>
-                    <p class="text-sm text-muted" id="t-desc-list">Filtrage par Section (X01, X02...) & Tests</p>
+                    <p class="text-sm text-muted" id="t-desc-list">Filtrage par Section (X01, X02...) & Base de données PDR</p>
                 </button>
                 <button onclick="nav('dcs')" class="card-bg p-6 rounded-xl border flex flex-col text-left hover:border-sonaOrange hover:shadow-lg transition">
-                    <h3 class="text-sonaOrange font-bold text-xl mb-1" id="t-menu-dcs">Section DCS & Instruments</h3>
-                    <p class="text-sm text-muted" id="t-desc-dcs">Localisation des tags et schémas complets</p>
-                </button>
-                <button onclick="nav('psv')" class="card-bg p-6 rounded-xl border flex flex-col text-left hover:border-sonaOrange hover:shadow-lg transition">
-                    <h3 class="text-sonaOrange font-bold text-xl mb-1" id="t-menu-psv">Registre PSV / TSV</h3>
-                    <p class="text-sm text-muted" id="t-desc-psv">Soupapes de sécurité et Set Points</p>
+                    <h3 class="text-sonaOrange font-bold text-xl mb-1" id="t-menu-dcs">Recherche DCS & Schémas</h3>
+                    <p class="text-sm text-muted" id="t-desc-dcs">Localisation des tags équipements et instruments</p>
                 </button>
             </div>
         </div>
 
         <div id="view-about" class="hidden-view space-y-6">
             <button onclick="nav('home')" class="text-sonaOrange font-bold text-lg hover:underline flex items-center gap-2">← <span id="t-back-1">Retour</span></button>
-            <h2 class="text-3xl font-black text-sonaOrange border-b-2 border-sonaOrange pb-2">Elaboration du Procédé GNL1Z</h2>
+            <h2 class="text-3xl font-black text-sonaOrange border-b-2 border-sonaOrange pb-2">Procédé GNL1Z (Arzew)</h2>
             
-            <div class="card-bg p-6 rounded-xl border space-y-4 text-sm leading-relaxed">
-                <p>Le complexe <strong>GNL1Z (Arzew)</strong> utilise le procédé de liquéfaction <strong>APCI C3-MR</strong> (Air Products & Chemicals Inc. Propane Pre-cooled Mixed Refrigerant).</p>
+            <div class="card-bg p-6 rounded-xl border space-y-4 text-sm leading-relaxed text-slate-800 dark:text-slate-200">
+                <p>Le complexe GNL1Z exploite la technologie de liquéfaction <strong>APCI C3-MR</strong> (Propane Pre-cooled Mixed Refrigerant).</p>
                 
-                <h4 class="font-bold text-sonaOrange text-lg mt-4">1. Unité de Pré-traitement</h4>
+                <h4 class="font-bold text-sonaOrange text-lg mt-4">Section 100 & 200 : Pré-traitement</h4>
                 <ul class="list-disc pl-5 space-y-2 text-muted">
-                    <li><strong>Décarbonatation :</strong> Le gaz d'alimentation passe dans l'absorbeur MEA (F-502) pour éliminer le CO2, évitant la formation de glace carbonique dans les échangeurs cryogéniques.</li>
-                    <li><strong>Déshydratation :</strong> Passage sur tamis moléculaires pour réduire la teneur en eau (point de rosée ultra-bas).</li>
-                    <li><strong>Démercurisation :</strong> Élimination critique du mercure pour prévenir la corrosion et la fragilisation de l'aluminium (LME) dans le MCHE.</li>
+                    <li><strong>Décarbonatation (Absorbeur MEA - F-501/502) :</strong> Le gaz brut entre en contact avec la Monoéthanolamine pour extraire le CO2, évitant le gel à basse température.</li>
+                    <li><strong>Déshydratation & Démercurisation :</strong> Élimination de l'eau via tamis moléculaires et du mercure pour protéger l'intégrité de l'aluminium cryogénique (MCHE) contre la corrosion (LME).</li>
                 </ul>
 
-                <h4 class="font-bold text-sonaOrange text-lg mt-4">2. Section de Liquéfaction</h4>
+                <h4 class="font-bold text-sonaOrange text-lg mt-4">Section 500 : Liquéfaction</h4>
                 <ul class="list-disc pl-5 space-y-2 text-muted">
-                    <li><strong>Cycle Propane (C3) :</strong> Refroidit le gaz naturel et le réfrigérant mixte jusqu'à environ -35°C via une série d'échangeurs (ex: E-504, E-505).</li>
-                    <li><strong>Cycle Réfrigérant Mixte (MR) :</strong> Un mélange d'azote, méthane, éthane et propane effectue le refroidissement final dans l'Échangeur Cryogénique Principal (MCHE) pour liquéfier le gaz à <strong>-161°C</strong>.</li>
+                    <li><strong>Boucle Propane (C3) :</strong> Pré-refroidissement du gaz naturel et du réfrigérant mixte (MR) en trois étages de pression jusqu'à -35°C (ex: E-504, E-505).</li>
+                    <li><strong>Boucle MR (MCR) :</strong> Le réfrigérant mixte (Azote, Méthane, Éthane, Propane) est compressé, refroidi, puis détendu dans le MCHE pour liquéfier le gaz naturel à <strong>-161°C</strong>.</li>
                 </ul>
             </div>
         </div>
@@ -92,17 +88,18 @@ cat << 'EOF' > index.html
             <button onclick="nav('home')" class="text-sonaOrange font-bold text-lg hover:underline flex items-center gap-2">← <span id="t-back-2">Retour</span></button>
             
             <div class="card-bg p-4 rounded-xl border space-y-3">
-                <input type="text" id="equip-search" placeholder="Rechercher Tag (ex: X01, E-501)..." class="w-full p-3 rounded border border-gray-300 dark:border-gray-700 bg-transparent outline-none focus:border-sonaOrange" oninput="filterEquipList()">
+                <input type="text" id="equip-search" placeholder="Rechercher Tag (ex: X01, E-501)..." class="w-full p-3 rounded border border-slate-300 dark:border-slate-700 bg-transparent outline-none focus:border-sonaOrange text-slate-900 dark:text-white" oninput="filterEquipList()">
                 
                 <div class="flex gap-2">
-                    <select id="section-filter" class="flex-1 p-3 rounded border border-gray-300 dark:border-gray-700 bg-transparent font-bold outline-none" onchange="filterEquipList()">
+                    <select id="section-filter" class="flex-1 p-3 rounded border border-slate-300 dark:border-slate-700 bg-transparent font-bold outline-none text-slate-900 dark:text-white" onchange="filterEquipList()">
                         <option value="all">Toutes Sections</option>
                         <option value="X01">Section 1 (X01)</option>
                         <option value="X02">Section 2 (X02)</option>
                         <option value="X03">Section 3 (X03)</option>
                         <option value="X04">Section 4 (X04)</option>
+                        <option value="X07">Section 7 (X07)</option>
                     </select>
-                    <select id="type-filter" class="flex-1 p-3 rounded border border-gray-300 dark:border-gray-700 bg-transparent font-bold outline-none" onchange="filterEquipList()">
+                    <select id="type-filter" class="flex-1 p-3 rounded border border-slate-300 dark:border-slate-700 bg-transparent font-bold outline-none text-slate-900 dark:text-white" onchange="filterEquipList()">
                         <option value="all">Tous Tests</option>
                         <option value="Préventive">Préventive</option>
                         <option value="Déroge">Déroge</option>
@@ -119,7 +116,7 @@ cat << 'EOF' > index.html
             
             <div class="card-bg p-6 rounded-xl border border-sonaOrange">
                 <h2 id="det-tag" class="text-4xl font-black text-sonaOrange mb-1"></h2>
-                <p id="det-name" class="text-lg font-bold text-muted mb-6"></p>
+                <p id="det-sec" class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-6"></p>
                 
                 <div class="space-y-3" id="accordion-container">
                     </div>
@@ -129,62 +126,47 @@ cat << 'EOF' > index.html
         <div id="view-dcs" class="hidden-view space-y-6">
             <button onclick="nav('home')" class="text-sonaOrange font-bold text-lg hover:underline flex items-center gap-2">← <span id="t-back-3">Retour</span></button>
             <div class="card-bg p-4 rounded-xl border">
-                <input type="text" id="dcs-query" placeholder="Rechercher un instrument ou équipement (ex: 501, LIC)..." class="w-full p-3 bg-transparent font-bold outline-none" oninput="searchDCS()">
+                <input type="text" id="dcs-query" placeholder="Rechercher tag instrument/équipement (ex: 501, LIC, X01)..." class="w-full p-3 bg-transparent font-bold outline-none text-slate-900 dark:text-white" oninput="searchDCS()">
             </div>
             
             <div id="dcs-results" class="space-y-4">
-                <p class="text-muted italic text-center p-4">Entrez un tag pour trouver les schémas DCS correspondants.</p>
+                <p class="text-muted italic text-center p-4">Entrez un tag pour localiser les schémas DCS correspondants.</p>
             </div>
-        </div>
-
-        <div id="view-psv" class="hidden-view space-y-6">
-            <button onclick="nav('home')" class="text-sonaOrange font-bold text-lg hover:underline flex items-center gap-2">← <span id="t-back-4">Retour</span></button>
-            <div class="card-bg p-4 rounded-xl border">
-                <input type="text" id="psv-query" placeholder="Rechercher PSV (ex: X01030)..." class="w-full p-3 bg-transparent font-bold outline-none" oninput="searchPSV()">
-            </div>
-            <div id="psv-results" class="space-y-2"></div>
         </div>
 
     </main>
 
     <script>
-        // --- DATABASE (Integrated from uploaded CSVs) ---
+        // --- DATABASE (Extracted strictly from uploaded CSV files) ---
 
-        // Equipments Database
         const EQUIP_DB = [
-            { tag: "X01-F-501", name: "Absorbeur MEA", type: "Déroge", comp: "Joints Spirales Inox 316, Clapets (Plateaux), Tamis York, Goujon Spécial Tige Carrée", tools: "Clé à choc, Extracteur de plateaux", lift: "Grue Mobile 25T, Elingues 10T", iso: "Vannes amont/aval, Platine d'obturation (Blind)" },
-            { tag: "X01-F-502", name: "Régénérateur MEA", type: "Déroge", comp: "Jeu de Demister (Inox 304), Joints Spirales, Clapets, Goujons", tools: "Clé dynamométrique (Hytorc), Grattoir", lift: "Grue 10T", iso: "Isolation Thermique Laine de Roche, Condamnation vannes" },
-            { tag: "X01-E-501", name: "Condenseur MCR", type: "Préventive", comp: "Joints Métalloplastiques (Dia:21 1/8\"), Anodes Zinc (Type E/D), Tiges Filetées B7", tools: "Extracteur de faisceau, Nettoyeur Haute Pression", lift: "Chariot Élévateur 10T", iso: "Double Block & Bleed, Calorifuge Polyuréthane" },
-            { tag: "X01-E-502", name: "Rebouilleur", type: "Préventive", comp: "Tubes en U (SA 249 304ELC, 3/4\" DE), Bouchons de tube conique, Joints Métalloplastiques", tools: "Coupe-tube interne, Pompe d'épreuve 200 Bar", lift: "Portique 5T", iso: "Isolation Vapeur, Purge Condensat" },
-            { tag: "X01-E-503A", name: "Échangeur Chaleur A", type: "Préventive", comp: "Tubes Droits (A 249 TP 304 SS), Bouchons, Joints Métalloplastiques", tools: "Clé hydraulique", lift: "Palan 3T", iso: "Isolation Eau de Mer, Isolation vannes papillon" },
-            { tag: "X01-E-504", name: "Échangeur Chaleur", type: "Préventive", comp: "Joints Métalloplastiques, Joints Spirales, Faisceau Tubulaire, Anode Zinc", tools: "Nettoyeur HP, Testeur d'épaisseur", lift: "Grue 50T", iso: "Platine d'obturation" },
-            { tag: "X01-G-502", name: "Pompe", type: "Préventive", comp: "Joints Spirales (Inox 316/Graphité)", tools: "Extracteur de roulement, Kit d'alignement Laser", lift: "Palan manuel", iso: "LOTO Électrique, Isolement vannes aspiration/refoulement" },
-            { tag: "X02-E-03.15", name: "Échangeur", type: "Préventive", comp: "Joints Spirales, Bouchon Mâle (A105), Tiges B7", tools: "Clé à molette 24mm", lift: "Manuel", iso: "Purge gaz" },
-            { tag: "X03-E-05.13", name: "Échangeur", type: "Déroge", comp: "Joints Face Pleine (Néoprène), Grillage (Inox 304), Bouchons (Cu/Ni)", tools: "Clé dynamométrique", lift: "Grue 10T", iso: "Calorifuge existant" }
+            // --- DATA FROM: Equipements à Déroger.csv ---
+            { tag: "X01-F-501", type: "Déroge", comp: "Joints Spirales Inox 316/Graphité, Clapets pour plateaux 304 S/S, Tamis York (Int/Ext), Goujons spéciaux Tige Carrée", tools: "Clés à choc, Extracteur de plateaux", lift: "Grue Mobile", iso: "Vannes amont/aval, Platine d'obturation" },
+            { tag: "X01-F-502", type: "Déroge", comp: "Jeu de Demister Complet (Inox 304), Joints Spirales ASME-B16.20, Tiges Cylindriques B7", tools: "Clé dynamométrique", lift: "Grue de levage", iso: "Condamnation des fluides, Calorifuge" },
+            { tag: "X03-E-05.13", type: "Déroge", comp: "Joint Plat Face Pleine (Néoprène), Joint d'Expansion, Vanne à passage direct, Grillage Inox 304", tools: "Outillage standard mécanique", lift: "Palan / Grue", iso: "Isolation vannes manuelles" },
+            { tag: "X03-E-05.14A", type: "Déroge", comp: "Tube droit sans soudure (70/30 Cu Ni), Vanne à Papillon pour eau de mer, Bouchon de tube Wilson, Anodes de Zinc", tools: "Coupe-tube, Kit de nettoyage", lift: "Équipement de levage standard", iso: "Isolation circuit Eau de Mer" },
+            { tag: "X04-E-05.24", type: "Déroge", comp: "Joint Métalloplastique Inox 304 (Dia: 36\"), Joint plat face surélevée", tools: "Clé de serrage au couple", lift: "Grue Mobile", iso: "Calorifuge cryogénique" },
+            { tag: "X07-E-07.23", type: "Déroge", comp: "Tube en U CS A214 (14 BWG), Joints Spirales 316/Graphité, Joint Métalloplastique", tools: "Pompe d'épreuve hydrostatique", lift: "Grue / Palan", iso: "LOTO, Purge et mise à l'air" },
+            // --- DATA FROM: équipements préventive reeprouver.csv ---
+            { tag: "X01-E-501", type: "Préventive", comp: "Joint Métalloplastique (Tête flottante & Plaque), Anode Zinc (Type E/D), Tiges Filetées SA-193 B7", tools: "Extracteur de faisceau, Clé Hydraulique", lift: "Chariot Élévateur / Grue", iso: "Isolation MCR, Dépose Calorifuge" },
+            { tag: "X01-E-502", type: "Préventive", comp: "Faisceau de tubes (U-Tube SA 249 304ELC), Bouchons de tube conique Inox TP-316, Joint Métalloplastique", tools: "Testeur de fuite, Nettoyeur HP", lift: "Portique de levage", iso: "Isolation Vapeur/Condensat" },
+            { tag: "X01-E-503A", type: "Préventive", comp: "Tubes droits A249 TP 304, Joint Métalloplastique avec barre centrale, Joints Spirales API601", tools: "Outils de retubage", lift: "Palan / Grue", iso: "LOTO hydraulique" },
+            { tag: "X01-E-504", type: "Préventive", comp: "Faisceau tubulaire (Tube droit), Joints Spirales, Joint d'expansion, Anode Zinc", tools: "Extracteur de faisceau", lift: "Grue lourde", iso: "Calorifuge Polyuréthane" },
+            { tag: "X02-E-03.16", type: "Préventive", comp: "Faisceau tubulaire complet (70/30 CuNi), Joint Métalloplastique (MK A, B, C, D), Bouchon conique", tools: "Équipement d'épreuve", lift: "Équipement de levage", iso: "Isolation sectionnement" },
+            { tag: "X07-E-07.30", type: "Préventive", comp: "Faisceau complet (OD 19.05mm), Vanne papillon, Joint d'expansion, Filtre type Y", tools: "Clés, Appareil de mesure", lift: "Palan", iso: "Retrait d'isolation" }
         ];
 
-        // DCS Mapping Database
+        // DCS Mapping Engine
         const DCS_DB = [
-            { id: "DCS_100_1", title: "Section 100 - Feed Gas", tags: ["X01-E-501", "X01-E-502", "X01-F-501", "LIC-501", "PSV X01014"], fileId: "1Yq_PLACEHOLDER_DRIVE_ID_1" },
-            { id: "DCS_100_2", title: "Section 100 - MEA System", tags: ["X01-F-502", "X01-P-501", "LIC-502", "PSV X01030", "X01-G-502"], fileId: "1Xz_PLACEHOLDER_DRIVE_ID_2" },
-            { id: "DCS_300_1", title: "Section 300 - Driers", tags: ["X03-E-05.13", "PSV X02005A"], fileId: "1Ab_PLACEHOLDER_DRIVE_ID_3" }
-        ];
-
-        // PSV / TSV Database (From CSV)
-        const PSV_DB = [
-            { tag: "PSV X00012", equip: "INSTRUMENT AIR RECEIVER G.325", setpoint: "10.34 BARS" },
-            { tag: "PSV X01003", equip: "MEA PURIFIER E-505", setpoint: "5.37 BARS" },
-            { tag: "PSV X01014", equip: "MEA REGENERATOR F-501", setpoint: "5.17 BARS" },
-            { tag: "PSV X01030", equip: "MEA ABSORBER F-502", setpoint: "49.65 BARS" },
-            { tag: "PSV X01035", equip: "MEA FILTER P-501", setpoint: "63.79 BARS" },
-            { tag: "PSV X02005A", equip: "PROCES GAS DRIER R-310", setpoint: "49.65 BARS" },
-            { tag: "TSV X06050", equip: "MAIN EXCHANGER E-520 LNG TO FLASH D", setpoint: "49.65 BARS" },
-            { tag: "TSV X08044", equip: "DE-ETHANISER REFLUX PUMP J-735", setpoint: "28.96 BARS" }
+            { id: "MAP_100", title: "Section 100 - MEA Absorber", tags: ["X01-F-501", "X01-F-502", "LIC-501", "TIC-102"], fileId: "1Yq_PLACEHOLDER_DRIVE_ID_1" },
+            { id: "MAP_500_A", title: "Section 500 - Cryogenic Exchangers A", tags: ["X01-E-501", "X01-E-502", "X01-E-503A", "X04-E-05.24", "PIC-505"], fileId: "1Xz_PLACEHOLDER_DRIVE_ID_2" },
+            { id: "MAP_500_B", title: "Section 500 - Propane Chilling", tags: ["X01-E-504", "X03-E-05.13", "X03-E-05.14A", "FIC-501"], fileId: "1Ab_PLACEHOLDER_DRIVE_ID_3" },
+            { id: "MAP_700", title: "Section 700 - Stabilizer Unit", tags: ["X07-E-07.23", "X07-E-07.30", "X02-E-03.16"], fileId: "1Cd_PLACEHOLDER_DRIVE_ID_4" }
         ];
 
         let currentLang = 'fr';
 
-        // --- THEME & LANGUAGE ---
+        // --- CORE UI LOGIC ---
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
         }
@@ -193,32 +175,29 @@ cat << 'EOF' > index.html
             currentLang = currentLang === 'fr' ? 'en' : 'fr';
             document.getElementById('lang-btn').innerText = currentLang === 'fr' ? 'EN' : 'FR';
             
-            const strings = {
-                fr: { about: "À propos du Procédé GNL1Z", list: "Liste des Équipements", dcs: "Section DCS & Instruments", psv: "Registre PSV / TSV", back: "Retour" },
-                en: { about: "About GNL1Z Process", list: "Equipment List", dcs: "DCS & Instruments", psv: "PSV / TSV Registry", back: "Back" }
+            const str = {
+                fr: { about: "À propos du Procédé GNL1Z", list: "Liste des Équipements", dcs: "Recherche DCS & Schémas", back: "Retour" },
+                en: { about: "About GNL1Z Process", list: "Equipment List", dcs: "DCS & Schematics Search", back: "Back" }
             };
             
-            document.getElementById('t-menu-about').innerText = strings[currentLang].about;
-            document.getElementById('t-menu-list').innerText = strings[currentLang].list;
-            document.getElementById('t-menu-dcs').innerText = strings[currentLang].dcs;
-            document.getElementById('t-menu-psv').innerText = strings[currentLang].psv;
-            for(let i=1; i<=4; i++) {
-                if(document.getElementById('t-back-'+i)) document.getElementById('t-back-'+i).innerText = strings[currentLang].back;
+            document.getElementById('t-menu-about').innerText = str[currentLang].about;
+            document.getElementById('t-menu-list').innerText = str[currentLang].list;
+            document.getElementById('t-menu-dcs').innerText = str[currentLang].dcs;
+            for(let i=1; i<=3; i++) {
+                if(document.getElementById('t-back-'+i)) document.getElementById('t-back-'+i).innerText = str[currentLang].back;
             }
         }
 
-        // --- NAVIGATION ---
         function nav(viewId) {
-            ['view-home', 'view-about', 'view-equip', 'view-detail', 'view-dcs', 'view-psv'].forEach(id => {
+            ['view-home', 'view-about', 'view-equip', 'view-detail', 'view-dcs'].forEach(id => {
                 document.getElementById(id).classList.add('hidden-view');
             });
             document.getElementById('view-' + viewId).classList.remove('hidden-view');
             
             if(viewId === 'equip') filterEquipList();
-            if(viewId === 'psv') searchPSV();
         }
 
-        // --- EQUIPMENT LIST LOGIC ---
+        // --- EQUIPMENT LIST & FILTERING ---
         function filterEquipList() {
             const query = document.getElementById('equip-search').value.toUpperCase();
             const secFilter = document.getElementById('section-filter').value;
@@ -227,8 +206,7 @@ cat << 'EOF' > index.html
             container.innerHTML = '';
 
             const filtered = EQUIP_DB.filter(e => {
-                // Auto-detect section from the first 3 chars (e.g., "X01")
-                const actualSec = e.tag.substring(0, 3);
+                const actualSec = e.tag.substring(0, 3); // Extracts "X01", "X02" automatically
                 
                 const matchTag = e.tag.includes(query);
                 const matchSec = secFilter === 'all' || actualSec === secFilter;
@@ -238,111 +216,86 @@ cat << 'EOF' > index.html
             });
 
             filtered.forEach(e => {
-                const badgeColor = e.type === 'Préventive' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                const badgeColor = e.type === 'Préventive' ? 'bg-green-100 text-green-800 dark:bg-emerald-900/50 dark:text-emerald-400 border border-emerald-500/20' : 'bg-red-100 text-red-800 dark:bg-rose-900/50 dark:text-rose-400 border border-rose-500/20';
                 
                 const card = document.createElement('div');
                 card.className = "card-bg p-4 rounded-xl border flex justify-between items-center cursor-pointer hover:border-sonaOrange transition";
                 card.onclick = () => openDetail(e);
                 card.innerHTML = `
                     <div>
-                        <div class="font-black text-lg">${e.tag}</div>
-                        <div class="text-sm text-muted mb-2">${e.name}</div>
-                        <span class="text-xs font-bold px-2 py-1 rounded ${badgeColor}">${e.type}</span>
+                        <div class="font-black text-xl text-slate-900 dark:text-slate-100">${e.tag}</div>
+                        <div class="mt-1"><span class="text-xs font-bold px-2 py-1 rounded ${badgeColor}">${e.type}</span></div>
                     </div>
-                    <span class="text-sonaOrange font-bold text-xl">→</span>
+                    <span class="text-sonaOrange font-bold text-2xl">→</span>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // --- THE 5 OPTIONS DETAIL VIEW ---
+        // --- 5 OPTIONS ACCORDION RENDERER ---
         function openDetail(equip) {
             nav('detail');
             document.getElementById('det-tag').innerText = equip.tag;
-            document.getElementById('det-name').innerText = equip.name;
+            document.getElementById('det-sec').innerText = "Section " + equip.tag.substring(0, 3).replace('X0', '');
             
             const container = document.getElementById('accordion-container');
             
-            // The strict 5 options requested
+            // STRICT 5 OPTIONS ENFORCEMENT
             const options = [
-                { title: currentLang === 'fr' ? "Type de Test" : "Test Type", content: `<span class="font-bold ${equip.type === 'Préventive' ? 'text-green-500' : 'text-red-500'}">${equip.type}</span>` },
-                { title: currentLang === 'fr' ? "Composants (PDR)" : "Components", content: equip.comp },
-                { title: currentLang === 'fr' ? "Outils Nécessaires" : "Tools Required", content: equip.tools },
-                { title: currentLang === 'fr' ? "Levage & Manutention" : "Lifting & Handling", content: equip.lift },
-                { title: currentLang === 'fr' ? "Isolation & Calorifugage" : "Isolation & Insulation", content: equip.iso }
+                { title: currentLang === 'fr' ? "1. Type de Test" : "1. Test Type", content: `<span class="font-bold uppercase ${equip.type === 'Préventive' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${equip.type}</span>` },
+                { title: currentLang === 'fr' ? "2. Composants (PDR)" : "2. Components", content: equip.comp },
+                { title: currentLang === 'fr' ? "3. Outils Nécessaires" : "3. Tools Required", content: equip.tools },
+                { title: currentLang === 'fr' ? "4. Levage & Manutention" : "4. Lifting & Handling", content: equip.lift },
+                { title: currentLang === 'fr' ? "5. Isolation & Calorifugage" : "5. Isolation & Insulation", content: equip.iso }
             ];
 
             container.innerHTML = options.map((opt, i) => `
-                <div class="card-bg border rounded-lg overflow-hidden">
-                    <button onclick="document.getElementById('acc-${i}').classList.toggle('hidden')" class="w-full p-4 text-left font-bold flex justify-between outline-none hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <div class="card-bg border rounded-lg overflow-hidden shadow-sm">
+                    <button onclick="document.getElementById('acc-${i}').classList.toggle('hidden')" class="w-full p-4 text-left font-bold flex justify-between outline-none text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                         ${opt.title} <span class="text-sonaOrange">▼</span>
                     </button>
-                    <div id="acc-${i}" class="${i===0?'':'hidden'} p-4 text-sm border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-black/20 text-muted">
+                    <div id="acc-${i}" class="${i===0?'':'hidden'} p-4 text-sm border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-black/20 text-muted leading-relaxed">
                         ${opt.content}
                     </div>
                 </div>
             `).join('');
         }
 
-        // --- DCS SEARCH LOGIC ---
+        // --- DCS CROSS-REFERENCE SEARCH ---
         function searchDCS() {
             const query = document.getElementById('dcs-query').value.toUpperCase();
             const container = document.getElementById('dcs-results');
             container.innerHTML = '';
             
             if (query.length < 2) {
-                container.innerHTML = `<p class="text-muted italic text-center p-4">Entrez au moins 2 caractères...</p>`;
+                container.innerHTML = `<p class="text-muted italic text-center p-4">Entrez au moins 2 caractères (ex: 501, LIC)...</p>`;
                 return;
             }
 
             const matches = DCS_DB.filter(map => map.tags.some(t => t.includes(query)) || map.title.toUpperCase().includes(query));
 
             if(matches.length === 0) {
-                container.innerHTML = `<p class="text-red-500 italic text-center p-4">Aucun schéma trouvé pour ce tag.</p>`;
+                container.innerHTML = `<p class="text-rose-500 italic text-center p-4">Aucun schéma DCS ne contient ce tag.</p>`;
                 return;
             }
 
             matches.forEach(map => {
                 const tagsHtml = map.tags.map(t => {
                     const isMatch = t.includes(query);
-                    return `<span class="text-[10px] px-2 py-1 rounded border ${isMatch ? 'bg-sonaOrange text-white border-sonaOrange' : 'border-gray-300 dark:border-gray-600 text-muted'}">${t}</span>`;
+                    return `<span class="text-[10px] px-2 py-1 rounded border ${isMatch ? 'bg-sonaOrange text-white border-sonaOrange font-bold' : 'border-slate-300 dark:border-slate-700 text-muted'}">${t}</span>`;
                 }).join('');
 
                 const card = document.createElement('div');
                 card.className = "card-bg p-4 rounded-xl border shadow-sm";
                 card.innerHTML = `
-                    <h4 class="font-black text-lg text-sonaOrange mb-2">${map.title}</h4>
-                    <div class="flex flex-wrap gap-1 mb-4">${tagsHtml}</div>
+                    <h4 class="font-black text-lg text-sonaOrange mb-3">${map.title}</h4>
+                    <div class="flex flex-wrap gap-2 mb-4">${tagsHtml}</div>
                     
-                    <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700" onclick="window.open('https://drive.google.com/uc?export=view&id=${map.fileId}', '_blank')">
-                        <img src="https://drive.google.com/thumbnail?id=${map.fileId}&sz=w800" class="w-full h-40 object-cover transition duration-300 group-hover:scale-105" onerror="this.src='https://placehold.co/600x400/1e293b/FF6B00?text=IMAGE+DCS+EN+ATTENTE'">
-                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-                            <span class="text-white font-bold tracking-widest text-sm border border-white px-4 py-2 rounded">VOIR DCS COMPLET</span>
+                    <div class="relative group cursor-pointer overflow-hidden rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900" onclick="window.open('https://drive.google.com/uc?export=view&id=${map.fileId}', '_blank')">
+                        <img src="https://drive.google.com/thumbnail?id=${map.fileId}&sz=w800" class="w-full h-40 object-cover opacity-80 group-hover:opacity-100 transition duration-300" onerror="this.src='https://placehold.co/600x400/0f172a/FF6B00?text=SCHEMA+DCS+EN+ATTENTE'">
+                        <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+                            <span class="text-white font-bold tracking-widest text-sm border-2 border-white px-4 py-2 rounded">VOIR DCS COMPLET</span>
                         </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // --- PSV SEARCH LOGIC ---
-        function searchPSV() {
-            const query = document.getElementById('psv-query').value.toUpperCase();
-            const container = document.getElementById('psv-results');
-            container.innerHTML = '';
-
-            const matches = PSV_DB.filter(p => p.tag.includes(query) || p.equip.includes(query));
-
-            matches.forEach(p => {
-                const card = document.createElement('div');
-                card.className = "card-bg p-4 rounded-lg border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2";
-                card.innerHTML = `
-                    <div>
-                        <div class="font-black text-sonaOrange">${p.tag}</div>
-                        <div class="text-xs text-muted font-mono">${p.equip}</div>
-                    </div>
-                    <div class="bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 px-3 py-1 rounded text-sm font-bold text-center whitespace-nowrap">
-                        SET: ${p.setpoint}
                     </div>
                 `;
                 container.appendChild(card);
